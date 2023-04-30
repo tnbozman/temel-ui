@@ -1,0 +1,130 @@
+#!/bin/bash
+
+empty="empty"
+name=$empty
+port=$empty
+basePath="/workspaces/temel-ui"
+success="SUCCESS"
+error="ERROR"
+starting="STARTING"
+
+# display help message if -h is a commandline arg
+help_message() {
+  if [[ $1 == "-h" ]]; then
+    echo "Usage new_mfe.sh -p {dev port} -n {project name} [options]";
+    echo "-n: Angular project name";
+    echo "-p: Module federation remote's port and angular dev port";
+    echo "OPTIONS:"
+    echo "-b Root of the angular mono-repo"
+    exit 0
+  fi
+}
+
+validate_name() {
+  appPath=$1
+  if [[ -f "$appPath/app.module.ts" ]]; then
+    echo "$error: Project with the same name already exists";
+    exit 0
+  fi
+}
+
+validate_port() {
+  echo "valid port"
+  # grep to see if the requested port is already assigned to another project
+  testPort="$(grep "\"port\": $port" ./angular.json)"
+  # use the grep result to wildcard compare on the requested port
+  if [[ $testPort == *"$port"* ]]; then
+    echo "$error: A project already exists on this port";
+    exit 0
+  fi
+}
+
+validate_args() {
+  if [[ $port == $empty ]] || [[ $name == $empty ]] ; then
+    echo "$error: Invalid arguments, please see help (-h)"
+    exit 0
+  fi
+}
+
+while getopts n:p:b:h flag
+do
+    case "${flag}" in
+        n) name=${OPTARG};;
+        p) port=${OPTARG};;
+        b) basePath=${OPTARG};;
+        h) help="-h";;
+    esac
+done
+
+# display help message if -h is a commandline arg
+help_message $help
+
+validate_args
+
+if [[ ! -d $basePath ]]; then
+  echo "$error: Root of the angular mono-repo cannot be found ($basePath)"
+  exit 0
+fi
+
+# path for the new project relative to basePath
+
+projectPath="./projects/$name/src";
+appPath="$projectPath/app"
+
+cd $basePath
+
+validate_name $appPath
+validate_port
+
+echo "#################################"
+echo "$starting: Create MFE project $name on port $port"
+echo "#################################"
+
+# Create mfe ng project with name provided
+ng generate application $name
+echo "$success: Project created"
+# configure the new project as a module federation remote on the port provided
+ng add @angular-architects/module-federation --project $name --port $port --type remote
+echo "$success: Module Federation configured"
+# if the project has been successfully created lets customise it
+if [[ ! -f "$appPath/app.module.ts" ]]; then
+  echo "$error: Project $name could not be found";
+  exit 0;
+fi
+
+# add material to the new projects app.modules
+sed -i "/^@NgModule.*/i import { MaterialModules } from '../../../../material.modules'" $appPath/app.module.ts
+sed -i "/imports.*/a MaterialModules," $appPath/app.module.ts
+echo "$success: app.module.ts configured for MaterialModules"
+# Add base layout and components
+ng generate component layouts/default-layout --project=$name
+cp $basePath/templates/default-layout.component.html $appPath/layouts/default-layout/default-layout.component.html
+ng generate component pages/not-found-page --project=$name
+ng generate component pages/landing-page --project=$name
+echo "$success: base layout and components created"
+# fix up the router
+# need to skip if router not added
+if [[ -f "$appPath/app-routing.module.ts" ]]; then
+  mkdir $appPath/router
+  rm $appPath/app-routing.module.ts
+  cp -a ./templates/router/app-routing.module.txt $appPath/router/app-routing.module.ts
+  cp -a ./templates/router/app.routes.txt $appPath/router/app.routes.ts
+  # fix the app component for routing
+  sed -i "s/app-routing.module/router\\/app-routing.module/" $appPath/app.module.ts
+  echo "$success: router configured"
+fi
+
+# added environment variables
+cp -a ./templates/environments $projectPath
+echo "$success: environments copied to project"
+# update angular.json with production fileReplacements for env
+updatedAngularJson="$(jq ".projects.$name.architect.build.configurations.production.fileReplacements += [{\"replace\": \"src/environments/environment.ts\",\"with\": \"src/environments/environment.prod.ts\"}]" ./angular.json)"
+echo -E "${updatedAngularJson}" > angular.json
+echo "$success: angular.json updated with production.fileReplacements for environments"
+
+# add serve and build scripts to package.json
+updatedPackageJson="$(jq ".scripts += {\"serve:$name\": \"ng serve $name -o\"}" ./package.json)"
+echo -E "${updatedPackageJson}" > ./package.json
+updatedPackageJson="$(jq ".scripts += {\"build:$name\": \"ng build $name\"}" ./package.json)"
+echo -E "${updatedPackageJson}" > ./package.json
+echo "$success: package.json updated"
