@@ -3,22 +3,25 @@
 empty="empty"
 name=$empty
 basePath="/workspaces/temel-ui"
+success="SUCCESS"
+error="ERROR"
+starting="STARTING"
 
 # display help message if -h is a commandline arg
 help_message() {
   if [[ $1 == "-h" ]]; then
     echo "Usage fix-existing-project.sh -p {project name}";
-    echo "-p: Angular project to add environments to";
+    echo "-n: Angular project to add environments to";
     echo "OPTIONS:"
     echo "-b Root of the angular mono-repo"
     exit 0
   fi
 }
 
-while getopts p:b:h flag
+while getopts n:b:h flag
 do
     case "${flag}" in
-        p) name=${OPTARG};;
+        n) name=${OPTARG};;
         b) basePath=${OPTARG};;
         h) help="-h";;
     esac

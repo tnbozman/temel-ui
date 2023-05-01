@@ -128,3 +128,7 @@ echo -E "${updatedPackageJson}" > ./package.json
 updatedPackageJson="$(jq ".scripts += {\"build:$name\": \"ng build $name\"}" ./package.json)"
 echo -E "${updatedPackageJson}" > ./package.json
 echo "$success: package.json updated"
+
+if [[ -f "./Jenkinsfile"]]; then
+  sed -i "/def microFrontends.*/a \ \ \t\t\t\t\t\t\t\t\t\t $name" ./Jenkinsfile
+fi

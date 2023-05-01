@@ -11,17 +11,17 @@ starting="STARTING"
 help_message() {
   if [[ $1 == "-h" ]]; then
     echo "Usage add-environments.sh -p {project name}";
-    echo "-p: Angular project to add environments to";
+    echo "-n: Angular project to add environments to";
     echo "OPTIONS:"
     echo "-b Root of the angular mono-repo"
     exit 0
   fi
 }
 
-while getopts p:b:h flag
+while getopts n:b:h flag
 do
     case "${flag}" in
-        p) project=${OPTARG};;
+        n) project=${OPTARG};;
         b) basePath=${OPTARG};;
         h) help="-h";;
     esac
