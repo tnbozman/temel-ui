@@ -1,0 +1,22 @@
+version: '3.6'
+
+volumes:
+  vscode-extensions:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+     # note: localhost:8080 is forwarded within devcontainer.json for convenience
+     - "8080:8080"
+    # volume for workspace defined in devcontainer.json
+    volumes:
+      # Use a named volume for the source code
+      - ..:/workspace
+      - ~/.ssh:/vscode/ssh
+      - ~/.gitconfig:/vscode/gitconfig-temp
+      # Persist VS Code extensions between rebuilds
+      - vscode-extensions:/root/.vscode-server/extensions
+    command: sleep infinity

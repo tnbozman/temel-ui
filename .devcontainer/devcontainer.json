@@ -1,14 +1,17 @@
 {
 	"name": "Angular",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"context": ".."
-	},
-
+	"dockerComposeFile": "docker-compose.yml",
+	"workspaceFolder": "/workspace",
+	"service": "app",
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
+			"settings": {
+				"editor.tabSize": 2,
+				"editor.formatOnSave": true,
+				"workbench.iconTheme": "material-icon-theme"
+			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"dbaeumer.vscode-eslint",
@@ -18,19 +21,23 @@
 				"ms-vscode.vscode-typescript-tslint-plugin",
 				"dracula-theme.theme-dracula",
 				"Gruntfuggly.todo-tree",
-				"ms-vscode.typescript-javascript-grammar"
+				"ms-vscode.typescript-javascript-grammar",
+        		"pkief.material-icon-theme"
 			]
 		}
 	},
-	
+
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [
 		4200, 9877
 	],
-	
+  "mounts": ["source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "source=${localEnv:HOME}/.ssh,target=/vscode/ssh,type=bind",
+    "source=${localEnv:HOME}/.gitconfig,target=/vscode/gitconfig-temp,type=bind"],
+
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
-	
+	"postCreateCommand": ".devcontainer/post-create.sh",
+  	"postStartCommand": ".devcontainer/post-start.sh",
 	// Set `remoteUser` to `root` to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "node"
 }
