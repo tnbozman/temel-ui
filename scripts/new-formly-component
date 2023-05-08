@@ -1,0 +1,80 @@
+#!/bin/bash
+
+empty="empty"
+name=$empty
+project=$empty
+customTypeSelection="y"
+basePath="/workspaces/temel-ui"
+success="SUCCESS"
+error="ERROR"
+starting="STARTING"
+
+help_message() {
+  if [[ $1 == "-h" ]]; then
+    echo "Usage new_mfe.sh -p {dev port} -n {project name} [options]";
+    echo "-n: Component name in (kebab-case)"
+    echo "-p: Angular project name";
+    echo "OPTIONS:"
+    echo "-c Register as formly custom type? Y|n"
+    echo "-b Root of the angular mono-repo"
+    exit 0
+  fi
+}
+
+validate_args() {
+  if [[ $name == $empty || $project == $empty ]] ; then
+    echo "$error: Invalid arguments, please see help (-h)"
+    exit 0
+  fi
+}
+
+while getopts n:p:c:b:h flag
+do
+    case "${flag}" in
+        n) name=${OPTARG};;
+        p) project=${OPTARG};;
+        c) customTypeSelection=${OPTARG};;
+        b) basePath=${OPTARG};;
+        h) help="-h";;
+    esac
+done
+
+# display help message if -h is a commandline arg
+help_message $help
+
+validate_args
+
+echo "#################################"
+echo "$starting: Creating formly component $name"
+echo "#################################"
+
+if [[ ! -d $basePath ]]; then
+  echo "$error: Root of the angular mono-repo cannot be found ($basePath)"
+  exit 0
+fi
+
+cd $basePath
+projectPath="./projects/$name/src";
+appPath="$projectPath/app"
+
+# kabab case name to camel case
+componentName="${echo $name | sed -e "s/\b\(.\)/\u\1/g" | sed -e 's/-//g'}Component"
+componentPath="./components/formly/$name/$name.component"
+
+ng generate component components/formly/${name} --project=$project
+echo "$success: $name component generated"
+
+sed -i "/^@NgModule.*/i import { $componentName } from '$componentPath';" $appPath/app.module.ts
+sed -i "/declarations.*/a $componentName," $appPath/app.module.ts
+
+echo "$success: component $name registered within app.module.ts"
+
+if [[ $customTypeSelection == "y" || $customTypeSelection == "Y" ]]; then
+    customType="{ name: $name, component: $componentName, wrappers: [] },"
+    # look for //formly-types in app.module.ts and insert the new formly type above
+    sed -i "/] //formly-types.*/i $customType" $appPath/app.module.ts
+
+    echo "$success: formly custom type added to app.module.ts"
+fi
+
+
