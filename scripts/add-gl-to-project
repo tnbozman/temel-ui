@@ -1,0 +1,63 @@
+empty="empty"
+name=$empty
+install="n"
+workspace="temel"
+basePath="/workspaces/temel-ui"
+success="SUCCESS"
+error="ERROR"
+starting="STARTING"
+
+help_message() {
+  if [[ $1 == "-h" ]]; then
+    echo "Usage new_mfe.sh -p {dev port} -n {project name} [options]";
+    echo "-n: Project name"
+    echo "OPTIONS:"
+    echo "-i: install golden-layout (n)"
+    echo "-w: Angular workspace name";
+    echo "-b Root of the angular mono-repo"
+    exit 0
+  fi
+}
+
+validate_args() {
+  if [[ $name == $empty ]] ; then
+    echo "$error: Invalid arguments, please see help (-h)"
+    exit 0
+  fi
+}
+
+while getopts n:w:b:h flag
+do
+    case "${flag}" in
+        n) name=${OPTARG};;
+        w) workspace=${OPTARG};;
+        b) basePath=${OPTARG};;
+        h) help="-h";;
+    esac
+done
+
+# display help message if -h is a commandline arg
+help_message $help
+
+validate_args
+
+echo "#################################"
+echo "$starting: Adding Golden Layout to Project $name"
+echo "#################################"
+
+cd $basePath
+projectPath="./projects/$name/src";
+appPath="$projectPath/app"
+
+if [[ $install == "y" || $install == "Y" ]]; then
+    npm install golden-layout --save
+fi
+
+unzip $basePath/templates/golden-layout.zip -d $appPath/components/
+
+sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/golden-layout-component.service.ts
+sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/boolean/boolean.component.ts
+sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/text/text.component.ts
+sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/color/color.component.ts
+sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/controls/controls.component.ts
+sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts

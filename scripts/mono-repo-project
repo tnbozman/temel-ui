@@ -68,8 +68,14 @@ echo "$success: workspace $name created"
 ng generate library $name-lib
 echo "$success: library $name-lib created"
 
-./scripts/patch-lib -n temel-lib -b $basePath
+./scripts/patch-existing-lib -n $name-lib -b $basePath
 echo "$success: library $name-lib patched"
+
+mkdir -p ./projects/$name-lib/src/lib/golden-layout
+cp $basePath/templates/base-component.directive ./projects/$name-lib/src/lib/golden-layout/base-component.directive.ts
+echo "$success: golden layout directive add to $name-lib"
+echo "export * from './lib/golden-layout/base-component.directive';" >> ./projects/$name-lib/src/lib/public-api.ts
+
 ng generate application shell
 echo "$success: project shell created"
 ./scripts/patch-existing-project -n shell -b $basePath
@@ -81,17 +87,6 @@ echo "$success: angular/material added"
 ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
 echo "$success: Module federation configured for shell project"
 
-ng add @ngx-formly/schematics --ui-theme=material
-echo "$success: Formly added"
-# add formly imports for app.module
-sed -i "/^@NgModule.*/i import { FormlyModule } from '@ngx-formly/core';" $appPath/app.module.ts
-sed -i "/^@NgModule.*/i import { FormlyMaterialModule } from '@ngx-formly/material';" $appPath/app.module.ts
+./scripts/add-formly-to-project -n shell -b -b $basePath -i y
 
-sed -i "/imports.*/a FormlyMaterialModule," $appPath/app.module.ts
-sed -i "/imports.*/a FormlyModule.forRoot( \n validationMessages: [], \n types: [ \n ] //formly-types)," $appPath/app.module.ts
-
-npm install golden-layout --save
-
-# > ng generate directive golden-layout/base-component --project=dempsey-lib
-# > ng generate component components/golden-layout-host --project=shell
-# > ng generate service components/golden-layout-host/golden-layout-component --project=shell
+./scripts/add-gl-to-project -n shell -b $basePath

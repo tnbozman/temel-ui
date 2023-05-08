@@ -1,0 +1,54 @@
+#!/bin/bash
+
+empty="empty"
+name=$empty
+install="n"
+basePath="/workspaces/temel-ui"
+success="SUCCESS"
+error="ERROR"
+starting="STARTING"
+
+help_message() {
+  if [[ $1 == "-h" ]]; then
+    echo "Usage new_mfe.sh -p {dev port} -n {project name} [options]";
+    echo "-n: Project name"
+    echo "OPTIONS:"
+    echo "-i: install formly into workspace (n)";
+    echo "-b Root of the angular mono-repo"
+    exit 0
+  fi
+}
+
+validate_args() {
+  if [[ $name == $empty ]] ; then
+    echo "$error: Invalid arguments, please see help (-h)"
+    exit 0
+  fi
+}
+
+while getopts n:w:b:h flag
+do
+    case "${flag}" in
+        n) name=${OPTARG};;
+        i) install=${OPTARG};;
+        b) basePath=${OPTARG};;
+        h) help="-h";;
+    esac
+done
+
+cd $basePath
+projectPath="./projects/$name/src";
+appPath="$projectPath/app"
+
+if [[ $install == "y" || $install == "Y" ]]; then
+    ng add @ngx-formly/schematics --ui-theme=material
+    echo "$success: Formly added"
+fi
+
+
+# add formly imports for app.module
+sed -i "/^@NgModule.*/i import { FormlyModule } from '@ngx-formly/core';" $appPath/app.module.ts
+sed -i "/^@NgModule.*/i import { FormlyMaterialModule } from '@ngx-formly/material';" $appPath/app.module.ts
+
+sed -i "/imports.*/a FormlyMaterialModule," $appPath/app.module.ts
+sed -i "/imports.*/a FormlyModule.forRoot( \n validationMessages: [], \n types: [ \n ] //formly-types)," $appPath/app.module.ts
