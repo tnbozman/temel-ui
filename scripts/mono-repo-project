@@ -48,6 +48,9 @@ if [[ ! -d $basePath ]]; then
 fi
 
 cd $basePath
+
+projectPath="./projects/$name/src";
+appPath="$projectPath/app"
 # check ng cli installed > version 15
 ngInstalled="$(npm list -g | grep @angular/cli)"
 if [[ ngInstalled == *"$ngCli@$ngVersion"* ]]; then
@@ -77,3 +80,18 @@ echo "$success: angular/material added"
 
 ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
 echo "$success: Module federation configured for shell project"
+
+ng add @ngx-formly/schematics --ui-theme=material
+echo "$success: Formly added"
+# add formly imports for app.module
+sed -i "/^@NgModule.*/i import { FormlyModule } from '@ngx-formly/core';" $appPath/app.module.ts
+sed -i "/^@NgModule.*/i import { FormlyMaterialModule } from '@ngx-formly/material';" $appPath/app.module.ts
+
+sed -i "/imports.*/a FormlyMaterialModule," $appPath/app.module.ts
+sed -i "/imports.*/a FormlyModule.forRoot( \n validationMessages: [], \n types: [ \n ] //formly-types)," $appPath/app.module.ts
+
+npm install golden-layout --save
+
+# > ng generate directive golden-layout/base-component --project=dempsey-lib
+# > ng generate component components/golden-layout-host --project=shell
+# > ng generate service components/golden-layout-host/golden-layout-component --project=shell
