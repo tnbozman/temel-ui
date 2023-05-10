@@ -2,7 +2,7 @@
 ARG VARIANT=16
 FROM mcr.microsoft.com/devcontainers/javascript-node:0-${VARIANT}
 
-RUN su node -c "umask 0002 && npm install -g eslint @angular/cli && npm config set legacy-peer-deps true"
+RUN su node -c "umask 0002 && npm install -g eslint @angular/cli@15.2.8 && npm config set legacy-peer-deps true"
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \

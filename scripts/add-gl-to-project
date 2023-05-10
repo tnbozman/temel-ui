@@ -43,7 +43,7 @@ help_message $help
 validate_args
 
 echo "#################################"
-echo "$starting: Adding Golden Layout to Project $name"
+echo "$starting: Adding Golden Layout to project $name"
 echo "#################################"
 
 cd $basePath
@@ -52,7 +52,9 @@ appPath="$projectPath/app"
 
 if [[ $install == "y" || $install == "Y" ]]; then
     npm install golden-layout --save
+    echo "$success: Golden layout installed"
 fi
+
 mkdir -p $appPath/components/golden-layout
 cp -r $basePath/templates/golden-layout/* $appPath/components/golden-layout/
 
@@ -62,3 +64,17 @@ sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/text/text.
 sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/color/color.component.ts
 sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/controls/controls.component.ts
 sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts
+
+mkdir -p $appPath/pages/golden-layout-example-page/
+cp -r $basePath/templates/golden-layout-example-page/* $appPath/pages/golden-layout-example-page/
+cp $appPath/pages/golden-layout-example-page/golden-layout-example-page.component.spec.ts.txt $appPath/pages/golden-layout-example-page/golden-layout-example-page.component.spec.ts
+rm $appPath/pages/golden-layout-example-page/golden-layout-example-page.component.spec.ts.txt
+cp $appPath/pages/golden-layout-example-page/golden-layout-example-page.component.ts.txt $appPath/pages/golden-layout-example-page/golden-layout-example-page.component.ts
+rm $appPath/pages/golden-layout-example-page/golden-layout-example-page.component.ts.txt
+
+sed -i "/export const APP_ROUTES: Routes.*/i import { GoldenLayoutExamplePageComponent } from '../pages/golden-layout-example-page/golden-layout-example-page.component';" $appPath/router/app.routes.ts
+sed -i "/export const APP_ROUTES: Routes.*/a { path: 'golden-layout', component: GoldenLayoutExamplePageComponent }," $appPath/router/app.routes.ts
+
+echo "#################################"
+echo "$success: Golden Layout added to project $name"
+echo "#################################"

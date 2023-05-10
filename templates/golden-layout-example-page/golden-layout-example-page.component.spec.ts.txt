@@ -1,0 +1,23 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { GoldenLayoutExamplePageComponent } from './golden-layout-example-page.component';
+
+describe('GoldenLayoutExamplePageComponent', () => {
+  let component: GoldenLayoutExamplePageComponent;
+  let fixture: ComponentFixture<GoldenLayoutExamplePageComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ GoldenLayoutExamplePageComponent ]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(GoldenLayoutExamplePageComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

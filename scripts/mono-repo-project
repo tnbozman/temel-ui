@@ -53,22 +53,11 @@ cd $basePath
 
 projectPath="./projects/$name/src";
 appPath="$projectPath/app"
-# check ng cli installed > version 15
-# ngInstalled="$(npm list -g | grep @angular/cli)"
-# echo "installed ng cli"
-# echo $ngInstalled
-# if [[ ngInstalled == *"$ngCli@$ngVersion"* ]]; then
-#   echo "$success: ng cli already installed ($ngInstalled)"
-# else
-#   echo "$starting: installing ng cli"
-#   npm install -g $ngCli@$ngVersion
-#   echo "$success: $ngCli@$ngVersion installed"
-# fi
 
 cp ./templates/material.modules.ts $basePath
 echo "$success: material.modules copied"
 rm .gitignore
-ng new $name --no-create-application --directory ./
+ng new $name --no-create-application --directory ./ --skip-install
 echo "$success: workspace $name created"
 ng generate library $name-lib --skip-install
 echo "$success: library $name-lib created"
@@ -87,7 +76,7 @@ echo "$success: project shell created"
 ./scripts/patch-existing-project -n shell -b $basePath
 echo "$success: project shell patched"
 
-ng add @angular/material
+ng add @angular/material --project shell
 echo "$success: angular/material added"
 
 ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
@@ -96,6 +85,11 @@ echo "$success: Module federation configured for shell project"
 ./scripts/add-formly-to-project -n shell -b $basePath -i y
 
 ./scripts/add-gl-to-project -n shell -b $basePath -i y
+serveCmds="concurrently --kill-others \"npm run watch:temel-lib\" \"npm run serve:shell\""
+updatedPackageJson="$(jq ".scripts += {\"serve\": $serveCmds}" ./package.json)"
+echo $updatedPackageJson
+npm i concurrently --save-dev
+npm install
 
 echo "#################################"
 echo "$success: Creating workspace $name complete"

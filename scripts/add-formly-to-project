@@ -49,14 +49,16 @@ projectPath="./projects/$name/src";
 appPath="$projectPath/app"
 
 if [[ $install == "y" || $install == "Y" ]]; then
-    ng add @ngx-formly/schematics --ui-theme=material
+    ng add @ngx-formly/schematics --ui-theme=material --project $name
     echo "$success: Formly added"
 fi
+mkdir -p $appPath/pages/basic-form-page/
+cp -r $basePath/templates/basic-form-page/* $appPath/pages/basic-form-page/
+cp $appPath/pages/basic-form-page/basic-form-page.component.spec.ts.txt $appPath/pages/basic-form-page/basic-form-page.component.spec.ts
+rm $appPath/pages/basic-form-page/basic-form-page.component.spec.ts.txt
+cp $appPath/pages/basic-form-page/basic-form-page.component.ts.txt $appPath/pages/basic-form-page/basic-form-page.component.ts
+rm $appPath/pages/basic-form-page/basic-form-page.component.ts.txt
 
 
-# add formly imports for app.module
-sed -i "/^@NgModule.*/i import { FormlyModule } from '@ngx-formly/core';" $appPath/app.module.ts
-sed -i "/^@NgModule.*/i import { FormlyMaterialModule } from '@ngx-formly/material';" $appPath/app.module.ts
-
-sed -i "/imports.*/a FormlyMaterialModule," $appPath/app.module.ts
-sed -i "/imports.*/a FormlyModule.forRoot( \n validationMessages: [], \n types: [ \n ] //formly-types)," $appPath/app.module.ts
+sed -i "/^export const APP_ROUTES: Routes.*/i import { BasicFormPageComponent } from '../pages/basic-form-page/basic-form-page.component';" $appPath/router/app.routes.ts
+sed -i "/^export const APP_ROUTES: Routes.*/a { path: 'basic-form', component: BasicFormPageComponent,}," $appPath/router/app.routes.ts
