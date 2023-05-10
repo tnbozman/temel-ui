@@ -1,0 +1,94 @@
+<section id="virtualOrEmbeddedSection">
+    <section id="embeddedSection">
+      <section id="embeddedRadioSection">
+        <input #embeddedRadio
+          id="embeddedRadio"
+          type="radio"
+          name="virtualOrEmbedded"
+          (click)="handleEmbeddedRadioClick()"
+        />
+        <label for="embeddedRadio">Embedded</label>
+      </section>
+    </section>
+    <section id="virtualSection">
+      <section id="virtualRadioSection">
+        <input #virtualRadio
+          id="virtualRadio"
+          type="radio"
+          name="virtualOrEmbedded"
+          (click)="handleVirtualRadioClick()"
+        />
+        <label for="virtualRadio">Virtual</label>
+      </section>
+      <section id="viewComponentRefOrAppRefSection">
+        <section id="viewComponentRefRadioSection">
+          <input #viewComponentRefRadio
+            id="viewComponentRefRadio"
+            type="radio"
+            name="viewComponentRefOrAppRef"
+            (click)="handleViewComponentRefRadioClick()"
+          />
+          <label for="viewComponentRefRadio">View Comp Ref</label>
+        </section>
+        <section id="appRefRadioSection">
+          <input #appRefRadio
+            id="appRefRadio"
+            type="radio"
+            name="viewComponentRefOrAppRef"
+            (click)="handleAppRefRadioClick()"
+          />
+          <label for="appRefRadio">App Ref</label>
+        </section>
+      </section>
+    </section>
+  </section>
+  <section id="addComponentSection">
+    <select #registeredComponentTypeSelect
+      id="registeredComponentTypeSelect"
+      class="control"
+      [value]="initialRegisteredComponentTypeName"
+      (change)="handleRegisteredComponentTypeSelectChange(registeredComponentTypeSelect.value)"
+    >
+      <option *ngFor="let name of registeredComponentTypeNames">{{name}}</option>
+    </select>
+    <button #addComponentButton id="addComponentButton" class="control" (click)="handleAddComponentButtonClick()">Add Component</button>
+  </section>
+  <section id="addTextComponentSection">
+    <input #componentTextInput id="componentTextInput"
+      class="control"
+      size="8"
+      [value]="initialComponentTextValue"
+      (input)="handleComponentTextInputInput(componentTextInput.value)"
+    />
+    <button #addTextComponentButton
+      id="addTextComponentButton"
+      class="control"
+      (click)="handleAddTextComponentButtonClick()"
+    >Add Text Component</button>
+  </section>
+  <section id="predefinedLayoutsSection">
+    <select #layoutSelect
+      id="layoutSelect"
+      class="control"
+      [value]="initialLayoutName"
+      (change)="handleLayoutSelectChange(layoutSelect.value)"
+    >
+      <option *ngFor="let name of layoutNames">{{name}}</option>
+    </select>
+    <button #loadLayoutButton id="loadLayoutButton" class="control" (click)="handleLoadLayoutButtonClick()">Load Layout</button>
+  </section>
+  <section id="saveAndReloadLayoutSection">
+    <button #saveLayoutButton id="saveLayoutButton" class="control" (click)="handleSaveLayoutButtonClick()">Save Layout</button>
+    <button #reloadSavedLayoutButton 
+      id="reloadSavedLayoutButton"
+      class="control"
+      [disabled]="saveLayoutButtonDisabled === true ? true : null"
+      (click)="handleReloadSavedLayoutClick()"
+    >Reload saved Layout</button>
+  </section>
+  <section id="dragSection">
+    <button class="draggable control" #dragMe>Drag me !</button>
+  </section>
+  <section> 
+    <div #placeHolder></div>
+  </section>

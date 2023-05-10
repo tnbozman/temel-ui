@@ -3,7 +3,7 @@
 empty="empty"
 name=$empty
 install="n"
-basePath="/workspaces/temel-ui"
+basePath="/workspace"
 success="SUCCESS"
 error="ERROR"
 starting="STARTING"

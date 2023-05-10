@@ -1,7 +1,7 @@
 #!/bin/bash
-ngVersion=15
+ngVersion=15.2.8
 ngCli="@angular/cli"
-basePath="/workspaces/temel-ui"
+basePath="/workspace"
 success="SUCCESS"
 error="ERROR"
 starting="STARTING"
@@ -53,11 +53,14 @@ projectPath="./projects/$name/src";
 appPath="$projectPath/app"
 # check ng cli installed > version 15
 ngInstalled="$(npm list -g | grep @angular/cli)"
+echo "installed ng cli"
+echo $ngInstalled
 if [[ ngInstalled == *"$ngCli@$ngVersion"* ]]; then
   echo "$success: ng cli already installed ($ngInstalled)"
 else
-  npm install -g @angular/cli
-  echo "$success: @angular/cli installed"
+  echo "$starting: installing ng cli"
+  npm install -g $ngCli@$ngVersion
+  echo "$success: $ngCli@$ngVersion installed"
 fi
 
 cp ./templates/material.modules.ts $basePath
@@ -87,6 +90,6 @@ echo "$success: angular/material added"
 ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
 echo "$success: Module federation configured for shell project"
 
-./scripts/add-formly-to-project -n shell -b -b $basePath -i y
+./scripts/add-formly-to-project -n shell -b $basePath -i y
 
-./scripts/add-gl-to-project -n shell -b $basePath
+./scripts/add-gl-to-project -n shell -b $basePath -i y

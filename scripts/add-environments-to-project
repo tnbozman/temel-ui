@@ -2,7 +2,7 @@
 
 empty="empty"
 project=$empty
-basePath="/workspaces/temel-ui"
+basePath="/workspace"
 success="SUCCESS"
 error="ERROR"
 starting="STARTING"

@@ -3,7 +3,7 @@
 empty="empty"
 name=$empty
 port=$empty
-basePath="/workspaces/temel-ui"
+basePath="/workspace"
 success="SUCCESS"
 error="ERROR"
 starting="STARTING"
@@ -127,6 +127,11 @@ updatedPackageJson="$(jq ".scripts += {\"serve:$name\": \"ng serve $name -o\"}" 
 echo -E "${updatedPackageJson}" > ./package.json
 updatedPackageJson="$(jq ".scripts += {\"build:$name\": \"ng build $name\"}" ./package.json)"
 echo -E "${updatedPackageJson}" > ./package.json
+serverAll="$(jq ".scripts.serveAll" ./package.json) \"npm run serve:$name\""
+# jq 'del(.scripts.serveAll)' ./package.json
+# updatedPackageJson="$(jq ".scripts += {\"serveAll\": $serverAll}" ./package.json)"
+echo $serverAll
+# echo -E "${updatedPackageJson}" > ./package.json
 echo "$success: package.json updated"
 
 if [[ -f "./Jenkinsfile"]]; then
