@@ -26,12 +26,13 @@ validate_args() {
   fi
 }
 
-while getopts n:w:b:h flag
+while getopts n:w:i:b:h flag
 do
     case "${flag}" in
         n) name=${OPTARG};;
         w) workspace=${OPTARG};;
         b) basePath=${OPTARG};;
+        i) install=${OPTARG};;
         h) help="-h";;
     esac
 done
@@ -52,8 +53,8 @@ appPath="$projectPath/app"
 if [[ $install == "y" || $install == "Y" ]]; then
     npm install golden-layout --save
 fi
-
-unzip $basePath/templates/golden-layout.zip -d $appPath/components/
+mkdir -p $appPath/components/golden-layout
+cp -r $basePath/templates/golden-layout/* $appPath/components/golden-layout/
 
 sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/golden-layout-component.service.ts
 sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/boolean/boolean.component.ts

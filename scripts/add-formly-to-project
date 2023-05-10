@@ -26,7 +26,7 @@ validate_args() {
   fi
 }
 
-while getopts n:w:b:h flag
+while getopts n:i:b:h flag
 do
     case "${flag}" in
         n) name=${OPTARG};;
@@ -35,6 +35,14 @@ do
         h) help="-h";;
     esac
 done
+
+# display help message if -h is a commandline arg
+help_message $help
+validate_args
+
+echo "#################################"
+echo "$starting: Adding Formly to Project $name"
+echo "#################################"
 
 cd $basePath
 projectPath="./projects/$name/src";

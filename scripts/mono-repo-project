@@ -39,8 +39,10 @@ help_message $help
 validate_args
 
 echo "#################################"
-echo "$starting: Creating workspace $name"
+echo "$starting: Creating $name"
 echo "#################################"
+
+# as angular is difficult with dependency management, ensure legacy-peer-deps is set
 
 if [[ ! -d $basePath ]]; then
   echo "$error: Root of the angular mono-repo cannot be found ($basePath)"
@@ -52,23 +54,23 @@ cd $basePath
 projectPath="./projects/$name/src";
 appPath="$projectPath/app"
 # check ng cli installed > version 15
-ngInstalled="$(npm list -g | grep @angular/cli)"
-echo "installed ng cli"
-echo $ngInstalled
-if [[ ngInstalled == *"$ngCli@$ngVersion"* ]]; then
-  echo "$success: ng cli already installed ($ngInstalled)"
-else
-  echo "$starting: installing ng cli"
-  npm install -g $ngCli@$ngVersion
-  echo "$success: $ngCli@$ngVersion installed"
-fi
+# ngInstalled="$(npm list -g | grep @angular/cli)"
+# echo "installed ng cli"
+# echo $ngInstalled
+# if [[ ngInstalled == *"$ngCli@$ngVersion"* ]]; then
+#   echo "$success: ng cli already installed ($ngInstalled)"
+# else
+#   echo "$starting: installing ng cli"
+#   npm install -g $ngCli@$ngVersion
+#   echo "$success: $ngCli@$ngVersion installed"
+# fi
 
 cp ./templates/material.modules.ts $basePath
 echo "$success: material.modules copied"
-
+rm .gitignore
 ng new $name --no-create-application --directory ./
 echo "$success: workspace $name created"
-ng generate library $name-lib
+ng generate library $name-lib --skip-install
 echo "$success: library $name-lib created"
 
 ./scripts/patch-existing-lib -n $name-lib -b $basePath
@@ -79,7 +81,8 @@ cp $basePath/templates/base-component.directive ./projects/$name-lib/src/lib/gol
 echo "$success: golden layout directive add to $name-lib"
 echo "export * from './lib/golden-layout/base-component.directive';" >> ./projects/$name-lib/src/lib/public-api.ts
 
-ng generate application shell
+echo "$starting: create project shell"
+ng generate application shell --skip-install
 echo "$success: project shell created"
 ./scripts/patch-existing-project -n shell -b $basePath
 echo "$success: project shell patched"
@@ -93,3 +96,8 @@ echo "$success: Module federation configured for shell project"
 ./scripts/add-formly-to-project -n shell -b $basePath -i y
 
 ./scripts/add-gl-to-project -n shell -b $basePath -i y
+
+echo "#################################"
+echo "$success: Creating workspace $name complete"
+echo "#################################"
+
