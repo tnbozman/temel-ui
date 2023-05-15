@@ -6,9 +6,9 @@ import {
 } from "golden-layout";
 import { BaseComponentDirective } from '{workspace}-lib';
 import { GoldenLayoutComponentService } from '../golden-layout-component.service';
-import { BooleanComponent } from '../boolean.component';
-import { TextComponent } from '../text.component';
-import { ColorComponent } from '../color.component';
+import { BooleanComponent } from '../boolean/boolean.component';
+import { TextComponent } from '../text/text.component';
+import { ColorComponent } from '../color/color.component';
 
 @Component({
   selector: 'app-golden-layout-host',

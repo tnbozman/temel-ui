@@ -1,0 +1,17 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "css/goldenlayout-base.css";
+@import "css/themes/goldenlayout-light-theme.css";
+
+// from Golden Layout Example
+html {
+    width: 100%;
+    height: 100%;
+}
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+}

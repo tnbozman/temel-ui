@@ -67,8 +67,14 @@ echo "$success: library $name-lib patched"
 
 mkdir -p ./projects/$name-lib/src/lib/golden-layout
 cp $basePath/templates/base-component.directive ./projects/$name-lib/src/lib/golden-layout/base-component.directive.ts
+cp $basePath/templates/text-component.interface ./projects/$name-lib/src/lib/golden-layout/text-component.interface.ts
 echo "$success: golden layout directive add to $name-lib"
-echo "export * from './lib/golden-layout/base-component.directive';" >> ./projects/$name-lib/src/lib/public-api.ts
+echo "export * from './lib/golden-layout/base-component.directive';" >> ./projects/$name-lib/src/public-api.ts
+echo "export * from './lib/golden-layout/text-component.interface';" >> ./projects/$name-lib/src/public-api.ts
+
+sed -i "/^@NgModule.*/i import { BaseComponentDirective } from './golden-layout/base-component.directive';" ./projects/$name-lib/src/lib/$name-lib.module.ts
+sed -i "/exports.*/a BaseComponentDirective," ./projects/$name-lib/src/lib/$name-lib.module.ts
+sed -i "/declarations.*/a BaseComponentDirective," ./projects/$name-lib/src/lib/$name-lib.module.ts
 
 echo "$starting: create project shell"
 ng generate application shell --skip-install
@@ -83,13 +89,16 @@ ng add @angular-architects/module-federation --project shell --port 4200 --type 
 echo "$success: Module federation configured for shell project"
 
 ./scripts/add-formly-to-project -n shell -b $basePath -i y
+./scripts/add-gl-to-project -n shell -b $basePath -w $name -i y
 
-./scripts/add-gl-to-project -n shell -b $basePath -i y
-serveCmds="concurrently --kill-others \"npm run watch:temel-lib\" \"npm run serve:shell\""
-updatedPackageJson="$(jq ".scripts += {\"serve\": $serveCmds}" ./package.json)"
-echo $updatedPackageJson
+npm install -g npm-add-script
+npmAddScript -k serve -v "concurrently --kill-others \"npm run watch:$name-lib\" \"npm run serve:shell\"" -f
+
+cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html
+
 npm i concurrently --save-dev
 npm install
+
 
 echo "#################################"
 echo "$success: Creating workspace $name complete"

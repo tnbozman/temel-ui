@@ -60,5 +60,13 @@ cp $appPath/pages/basic-form-page/basic-form-page.component.ts.txt $appPath/page
 rm $appPath/pages/basic-form-page/basic-form-page.component.ts.txt
 
 
+sed -i "s/{ ReactiveFormsModule }/{ FormsModule, ReactiveFormsModule }/g" $appPath/app.module.ts
+sed -i "/^@NgModule.*/i import { BasicFormPageComponent } from './pages/basic-form-page/basic-form-page.component';" $appPath/app.module.ts
+
+sed -i "/imports.*/a FormsModule," $appPath/app.module.ts
+sed -i "/declarations.*/a BasicFormPageComponent," $appPath/app.module.ts
+
 sed -i "/^export const APP_ROUTES: Routes.*/i import { BasicFormPageComponent } from '../pages/basic-form-page/basic-form-page.component';" $appPath/router/app.routes.ts
 sed -i "/^export const APP_ROUTES: Routes.*/a { path: 'basic-form', component: BasicFormPageComponent,}," $appPath/router/app.routes.ts
+
+echo '<div><a routerLink="/basic-form">Basic Form</a></div>' >> $appPath/pages/landing-page/landing-page.component.html
