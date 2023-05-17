@@ -6,6 +6,7 @@ import {
 } from "golden-layout";
 import { BaseComponentDirective } from '{workspace}-lib';
 import { GoldenLayoutComponentService } from '../golden-layout-component.service';
+import { ModuleFederationService } from '../../module-federation/module-federation.service';
 import { BooleanComponent } from '../boolean/boolean.component';
 import { TextComponent } from '../text/text.component';
 import { ColorComponent } from '../color/color.component';
@@ -46,6 +47,7 @@ export class GoldenLayoutHostComponent implements OnDestroy {
   constructor(private _appRef: ApplicationRef,
     private _elRef: ElementRef<HTMLElement>,
     private goldenLayoutComponentService: GoldenLayoutComponentService,
+    private moduleFederationService: ModuleFederationService
   ) {
     this._goldenLayoutElement = this._elRef.nativeElement;
   }
@@ -55,6 +57,11 @@ export class GoldenLayoutHostComponent implements OnDestroy {
     this.goldenLayoutComponentService.registerComponentType(BooleanComponent.componentTypeName, BooleanComponent);
     this.goldenLayoutComponentService.registerComponentType(TextComponent.componentTypeName, TextComponent);
     this.goldenLayoutComponentService.registerComponentType(ColorComponent.componentTypeName, ColorComponent);
+    // register mfe components
+    for (const item of this.moduleFederationService.getGoldenLayoutRemoteModules()){
+      const module = await this.moduleFederationService.loadModule(item);
+      this.goldenLayoutComponentService.registerComponentType(module.componentTypeName, module);
+    }
   }
 
 

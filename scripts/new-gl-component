@@ -2,7 +2,7 @@
 
 empty="empty"
 name=$empty
-workspace="temel"
+workspace=$empty
 basePath="/workspace"
 success="SUCCESS"
 error="ERROR"
@@ -12,15 +12,15 @@ help_message() {
   if [[ $1 == "-h" ]]; then
     echo "Usage new_mfe.sh -p {dev port} -n {project name} [options]";
     echo "-n: Component name in (kebab-case)"
-    echo "OPTIONS:"
     echo "-w: Angular workspace name";
+    echo "OPTIONS:"
     echo "-b Root of the angular mono-repo"
     exit 0
   fi
 }
 
 validate_args() {
-  if [[ $name == $empty ]] ; then
+  if [[ $name == $empty || $workspace == $empty ]] ; then
     echo "$error: Invalid arguments, please see help (-h)"
     exit 0
   fi

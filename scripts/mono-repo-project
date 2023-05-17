@@ -86,19 +86,28 @@ ng add @angular/material --project shell
 echo "$success: angular/material added"
 
 ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
+mkdir -p ./projects/shell/src/app/components/module-federation
+cp -r $basePath/templates/module-federation/* ./projects/shell/src/app/components/module-federation
+mkdir -p ./projects/shell/src/assets
+cp $basePath/templates/mf.manifest.json ./projects/shell/src/assets/mf.manifest.json
 echo "$success: Module federation configured for shell project"
+
+# Sometimes module-federation isn't being installed. Lets force it
+if ! (grep -q '"@angular-architects/module-federation":' ./package.json)
+then
+ ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
+fi
 
 ./scripts/add-formly-to-project -n shell -b $basePath -i y
 ./scripts/add-gl-to-project -n shell -b $basePath -w $name -i y
 
+cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html
+
 npm install -g npm-add-script
 npmAddScript -k serve -v "concurrently --kill-others \"npm run watch:$name-lib\" \"npm run serve:shell\"" -f
 
-cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html
-
 npm i concurrently --save-dev
 npm install
-
 
 echo "#################################"
 echo "$success: Creating workspace $name complete"
