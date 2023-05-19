@@ -1,35 +1,61 @@
 #!/bin/bash
 
+Color_Off='\033[0m'       # Text Reset
+# Regular Colors
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Blue='\033[0;34m'         # Blue
+Yellow='\033[0;33m'       # Yellow
+Purple='\033[0;35m'       # Purple
+
+remove="${Purple}DELETE${Color_Off}"
+success="${Green}SUCCESS${Color_Off}"
+create="${Green}CREATE${Color_Off}"
+update="${Green}UPDATE${Color_Off}"
+error="${Red}ERROR${Color_Off}"
+starting="${Yellow}STARTING${Color_Off}"
+line="${Yellow}#################################${Color_Off}"
+complete="${Yellow}COMPLETED${Color_Off}"
+
 empty="empty"
 name=$empty
 workspace=$empty
+project=$empty
 basePath="/workspace"
-success="SUCCESS"
-error="ERROR"
-starting="STARTING"
+
+command_msg(){
+  if [ $? == 0 ] ; then
+    echo -e "$1 $2"
+  else
+    echo -e "$error $2"
+    exit 1
+  fi
+}
 
 help_message() {
   if [[ $1 == "-h" ]]; then
-    echo "Usage new_mfe.sh -p {dev port} -n {project name} [options]";
+    echo "Usage new-gl-component.sh -n {component-name} -p {project name} -w {workspace} [options]";
     echo "-n: Component name in (kebab-case)"
+    echo "-p: Angular project name"
     echo "-w: Angular workspace name";
     echo "OPTIONS:"
     echo "-b Root of the angular mono-repo"
-    exit 0
+    exit 1
   fi
 }
 
 validate_args() {
-  if [[ $name == $empty || $workspace == $empty ]] ; then
-    echo "$error: Invalid arguments, please see help (-h)"
-    exit 0
+  if [[ $name == $empty || $workspace == $empty || $project == $empty ]] ; then
+    echo -e "$error Invalid arguments, please see help (-h)"
+    exit 1
   fi
 }
 
-while getopts n:w:b:h flag
+while getopts n:p:w:b:h flag
 do
     case "${flag}" in
         n) name=${OPTARG};;
+        p) project=${OPTARG};;
         w) workspace=${OPTARG};;
         b) basePath=${OPTARG};;
         h) help="-h";;
@@ -41,14 +67,12 @@ help_message $help
 
 validate_args
 
-echo "#################################"
-echo "$starting: Creating Golden Layout Component $name"
-echo "#################################"
-
+echo -e $line
+echo -e "$starting Creating Golden Layout Component $name"
 
 if [[ ! -d $basePath ]]; then
-  echo "$error: Root of the angular mono-repo cannot be found ($basePath)"
-  exit 0
+  echo -e "$error Root of the angular mono-repo cannot be found ($basePath)"
+  exit 1
 fi
 
 cd $basePath
@@ -60,12 +84,12 @@ componentName="${echo $name | sed -e "s/\b\(.\)/\u\1/g" | sed -e 's/-//g'}Compon
 componentPath="./components/golden-layout/$name/$name.component"
 
 ng generate component components/golden-layout/${name} --project=$project
-echo "$success: $name component generated"
+echo -e "$success $name component generated"
 
 sed -i "/^@NgModule.*/i import { $componentName } from '$componentPath';" $appPath/app.module.ts
 sed -i "/declarations.*/a $componentName," $appPath/app.module.ts
 
-echo "$success: component $name registered within app.module.ts"
+echo -e "$success component $name registered within app.module.ts"
 
 cp $basePath/templates/gl.component ${componentPath}.ts
 cp $basePath/templates/gl.component.html ${componentPath}.html
@@ -73,5 +97,8 @@ cp $basePath/templates/gl.component.html ${componentPath}.html
 sed -i "s/{workspace}/$workspace/g" ${componentPath}.ts
 sed -i "s/{name}/$name/g" ${componentPath}.ts
 sed -i "s/{componentName}/$componentName/g" ${componentPath}.ts
+
+echo -e "$success Golden Layout Component $name created"
+echo -e $line
 
 

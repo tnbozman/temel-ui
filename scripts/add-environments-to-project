@@ -1,27 +1,50 @@
 #!/bin/bash
 
+Color_Off='\033[0m'       # Text Reset
+# Regular Colors
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Blue='\033[0;34m'         # Blue
+Yellow='\033[0;33m'       # Yellow
+Purple='\033[0;35m'       # Purple
+
+remove="${Purple}DELETE${Color_Off}"
+success="${Green}SUCCESS${Color_Off}"
+create="${Green}CREATE${Color_Off}"
+update="${Green}UPDATE${Color_Off}"
+error="${Red}ERROR${Color_Off}"
+starting="${Yellow}STARTING${Color_Off}"
+line="${Yellow}#################################${Color_Off}"
+complete="${Yellow}COMPLETED${Color_Off}"
+
 empty="empty"
-project=$empty
+name=$empty
 basePath="/workspace"
-success="SUCCESS"
-error="ERROR"
-starting="STARTING"
+
+command_msg(){
+  if [ $? == 0 ] ; then
+    echo -e "$1 $2"
+  else
+    echo -e "$error $2"
+    exit 1
+  fi
+}
 
 # display help message if -h is a commandline arg
 help_message() {
   if [[ $1 == "-h" ]]; then
-    echo "Usage add-environments.sh -p {project name}";
+    echo "Usage add-environments-to-project.sh -n {project-name}";
     echo "-n: Angular project to add environments to";
     echo "OPTIONS:"
     echo "-b Root of the angular mono-repo"
-    exit 0
+    exit 1
   fi
 }
 
 while getopts n:b:h flag
 do
     case "${flag}" in
-        n) project=${OPTARG};;
+        n) name=${OPTARG};;
         b) basePath=${OPTARG};;
         h) help="-h";;
     esac
@@ -30,30 +53,33 @@ done
 # display help message if -h is a commandline arg
 help_message $help
 
-echo "#################################"
-echo "$starting: Adding environments to project $name"
-echo "#################################"
+echo -e $line
+echo -e "$starting Adding environments to project $name"
 
 if [[ ! -d $basePath ]]; then
-  echo "$error: Root of the angular mono-repo cannot be found ($basePath)"
-  exit 0
+  echo -e "$error Root of the angular mono-repo cannot be found ($basePath)"
+  exit 1
 fi
 
 cd $basePath
 
-projectPath="./projects/$project/src";
+projectPath="./projects/$name/src";
 
 # if the project has been successfully created lets customise it
 if [[ ! -f "$projectPath/app/app.module.ts" ]]; then
-  echo "$error: Project $name could not be found";
-  exit 0;
+  echo -e "$error Project $name could not be found";
+  exit 1;
 fi
 
 # added environment variables
 cp -a ./templates/environments $projectPath
-echo "$success: environments copied to project"
+command_msg $success "environments copied to project $name"
+
 # update angular.json with production fileReplacements for env
-updatedAngularJson="$(jq ".projects.$project.architect.build.configurations.production.fileReplacements += [{\"replace\": \"projects/$project/src/environments/environment.ts\",\"with\": \"projects/$project/src/environments/environment.prod.ts\"}]" ./angular.json)"
+updatedAngularJson="$(jq ".projects.$name.architect.build.configurations.production.fileReplacements += [{\"replace\": \"projects/$name/src/environments/environment.ts\",\"with\": \"projects/$name/src/environments/environment.prod.ts\"}]" ./angular.json)"
 echo -E "${updatedAngularJson}" > angular.json
-echo "$success: angular.json updated with production.fileReplacements for environments"
+command_msg $update "angular.json"
+
+echo -e "$success Environments added to project $name"
+echo -e $line
 

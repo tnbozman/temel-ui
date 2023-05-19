@@ -1,10 +1,25 @@
 #!/bin/bash
+
+Color_Off='\033[0m'       # Text Reset
+# Regular Colors
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Blue='\033[0;34m'         # Blue
+Yellow='\033[0;33m'       # Yellow
+Purple='\033[0;35m'       # Purple
+
+remove="${Purple}DELETE${Color_Off}"
+success="${Green}SUCCESS${Color_Off}"
+create="${Green}CREATE${Color_Off}"
+update="${Green}UPDATE${Color_Off}"
+error="${Red}ERROR${Color_Off}"
+starting="${Yellow}STARTING${Color_Off}"
+line="${Yellow}#################################${Color_Off}"
+complete="${Yellow}COMPLETED${Color_Off}"
+
 ngVersion=15.2.8
 ngCli="@angular/cli"
 basePath="/workspace"
-success="SUCCESS"
-error="ERROR"
-starting="STARTING"
 
 # display help message if -h is a commandline arg
 help_message() {
@@ -13,14 +28,24 @@ help_message() {
     echo "-n: Angular workspace name";
     echo "OPTIONS:"
     echo "-b Root of the angular mono-repo"
-    exit 0
+    exit 1
   fi
 }
 
 validate_args() {
   if [[ $name == $empty ]] ; then
-    echo "$error: Invalid arguments, please see help (-h)"
-    exit 0
+    echo -e "$error Invalid arguments, please see help (-h)"
+    exit 1
+  fi
+}
+
+
+command_msg(){
+  if [ $? == 0 ] ; then
+    echo -e "$1 $2"
+  else
+    echo -e "$error $2"
+    exit 1
   fi
 }
 
@@ -38,78 +63,100 @@ help_message $help
 
 validate_args
 
-echo "#################################"
-echo "$starting: Creating $name"
-echo "#################################"
+echo -e $line
+echo -e "$starting: Creating $name"
 
 # as angular is difficult with dependency management, ensure legacy-peer-deps is set
 
 if [[ ! -d $basePath ]]; then
-  echo "$error: Root of the angular mono-repo cannot be found ($basePath)"
-  exit 0
+  echo -e "$error Root of the angular mono-repo cannot be found ($basePath)"
+  exit 1
 fi
 
 cd $basePath
 
-projectPath="./projects/$name/src";
+projectPath="./projects/$name/src"
 appPath="$projectPath/app"
 
+
 cp ./templates/material.modules.ts $basePath
-echo "$success: material.modules copied"
+command_msg $create "material.modules.ts"
+
 rm .gitignore
 ng new $name --no-create-application --directory ./ --skip-install
-echo "$success: workspace $name created"
+command_msg $success "workspace $name created"
 ng generate library $name-lib --skip-install
-echo "$success: library $name-lib created"
+command_msg $success "library $name-lib created"
 
 ./scripts/patch-existing-lib -n $name-lib -b $basePath
-echo "$success: library $name-lib patched"
 
 mkdir -p ./projects/$name-lib/src/lib/golden-layout
 cp $basePath/templates/base-component.directive ./projects/$name-lib/src/lib/golden-layout/base-component.directive.ts
+command_msg $create "projects/$name-lib/src/lib/golden-layout/base-component.directive.ts"
 cp $basePath/templates/text-component.interface ./projects/$name-lib/src/lib/golden-layout/text-component.interface.ts
-echo "$success: golden layout directive add to $name-lib"
+command_msg $create "projects/$name-lib/src/lib/golden-layout/text-component.interface.ts"
+
+
 echo "export * from './lib/golden-layout/base-component.directive';" >> ./projects/$name-lib/src/public-api.ts
+command_msg $update "projects/$name-lib/src/public-api.ts"
 echo "export * from './lib/golden-layout/text-component.interface';" >> ./projects/$name-lib/src/public-api.ts
+command_msg $update "projects/$name-lib/src/public-api.ts"
 
 sed -i "/^@NgModule.*/i import { BaseComponentDirective } from './golden-layout/base-component.directive';" ./projects/$name-lib/src/lib/$name-lib.module.ts
+command_msg $update "projects/$name-lib/src/lib/$name-lib.module.ts"
 sed -i "/exports.*/a BaseComponentDirective," ./projects/$name-lib/src/lib/$name-lib.module.ts
+command_msg $update "projects/$name-lib/src/lib/$name-lib.module.ts"
 sed -i "/declarations.*/a BaseComponentDirective," ./projects/$name-lib/src/lib/$name-lib.module.ts
+command_msg $update "projects/$name-lib/src/lib/$name-lib.module.ts"
 
-echo "$starting: create project shell"
+echo -e "$starting: create project shell"
 ng generate application shell --skip-install
-echo "$success: project shell created"
+command_msg $success "project shell created"
+npm install -g npm-add-script
+command_msg $success "npm npm-add-script added"
+
 ./scripts/patch-existing-project -n shell -b $basePath
-echo "$success: project shell patched"
 
 ng add @angular/material --project shell
-echo "$success: angular/material added"
+command_msg $success "angular/material added to project shell"
 
 ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
+command_msg $success "Module federation added to shell project"
+
 mkdir -p ./projects/shell/src/app/components/module-federation
 cp -r $basePath/templates/module-federation/* ./projects/shell/src/app/components/module-federation
+command_msg $create "Module federation service added to projects/shell/src/app/components/module-federation"
 mkdir -p ./projects/shell/src/assets
 cp $basePath/templates/mf.manifest.json ./projects/shell/src/assets/mf.manifest.json
-echo "$success: Module federation configured for shell project"
+command_msg $create "projects/shell/src/assets/mf.manifest.json"
+echo -e "$success Module federation configured for shell project"
 
+mfReattemp=0
 # Sometimes module-federation isn't being installed. Lets force it
-if ! (grep -q '"@angular-architects/module-federation":' ./package.json)
-then
- ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
+until (grep -q '"@angular-architects/module-federation":' ./package.json)
+do
+  mfReattemp=1
+  echo -e "${Yellow}REATTEMPT${Color_Off} detected module federation missing, trying to add"
+  ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
+done
+
+if [[ $mfReattempt == 1 ]]; then
+  echo -e "$success Module federation reattempt"
 fi
 
 ./scripts/add-formly-to-project -n shell -b $basePath -i y
-./scripts/add-gl-to-project -n shell -b $basePath -w $name -i y
+./scripts/add-gl-to-project -n shell -b $basePath -w $name -t s -i y
 
 cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html
+command_msg $update "projects/shell/src/app/app.component.html"
 
-npm install -g npm-add-script
 npmAddScript -k serve -v "concurrently --kill-others \"npm run watch:$name-lib\" \"npm run serve:shell\"" -f
+command_msg $update "project.json"
 
 npm i concurrently --save-dev
+command_msg $success "npm concurrently added"
 npm install
 
-echo "#################################"
-echo "$success: Creating workspace $name complete"
-echo "#################################"
+echo -e "$success Creating workspace $name complete"
+echo -e $line
 

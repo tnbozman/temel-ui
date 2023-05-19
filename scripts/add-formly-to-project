@@ -1,28 +1,51 @@
 #!/bin/bash
 
+Color_Off='\033[0m'       # Text Reset
+# Regular Colors
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Blue='\033[0;34m'         # Blue
+Yellow='\033[0;33m'       # Yellow
+Purple='\033[0;35m'       # Purple
+
+remove="${Purple}DELETE${Color_Off}"
+success="${Green}SUCCESS${Color_Off}"
+create="${Green}CREATE${Color_Off}"
+update="${Green}UPDATE${Color_Off}"
+error="${Red}ERROR${Color_Off}"
+starting="${Yellow}STARTING${Color_Off}"
+line="${Yellow}#################################${Color_Off}"
+complete="${Yellow}COMPLETED${Color_Off}"
+
 empty="empty"
 name=$empty
 install="n"
 basePath="/workspace"
-success="SUCCESS"
-error="ERROR"
-starting="STARTING"
+
+command_msg(){
+  if [ $? == 0 ] ; then
+    echo -e "$1 $2"
+  else
+    echo -e "$error $2"
+    exit 1
+  fi
+}
 
 help_message() {
   if [[ $1 == "-h" ]]; then
-    echo "Usage new_mfe.sh -p {dev port} -n {project name} [options]";
+    echo "Usage add-formly-to-project.sh -n {project name} [options]";
     echo "-n: Project name"
     echo "OPTIONS:"
     echo "-i: install formly into workspace (n)";
     echo "-b Root of the angular mono-repo"
-    exit 0
+    exit 1
   fi
 }
 
 validate_args() {
   if [[ $name == $empty ]] ; then
-    echo "$error: Invalid arguments, please see help (-h)"
-    exit 0
+    echo -e "$error Invalid arguments, please see help (-h)"
+    exit 1
   fi
 }
 
@@ -40,9 +63,8 @@ done
 help_message $help
 validate_args
 
-echo "#################################"
-echo "$starting: Adding Formly to Project $name"
-echo "#################################"
+echo -e $line
+echo -e "$starting Adding Formly to Project $name"
 
 cd $basePath
 projectPath="./projects/$name/src";
@@ -50,23 +72,38 @@ appPath="$projectPath/app"
 
 if [[ $install == "y" || $install == "Y" ]]; then
     ng add @ngx-formly/schematics --ui-theme=material --project $name
-    echo "$success: Formly added"
+    echo -e "$success Formly added"
 fi
 mkdir -p $appPath/pages/basic-form-page/
 cp -r $basePath/templates/basic-form-page/* $appPath/pages/basic-form-page/
+command_msg $success "Formly basic page copy"
 cp $appPath/pages/basic-form-page/basic-form-page.component.spec.ts.txt $appPath/pages/basic-form-page/basic-form-page.component.spec.ts
+command_msg $create "$appPath/pages/basic-form-page/basic-form-page.component.spec.ts"
 rm $appPath/pages/basic-form-page/basic-form-page.component.spec.ts.txt
+command_msg $remove "$appPath/pages/basic-form-page/basic-form-page.component.spec.ts.txt"
 cp $appPath/pages/basic-form-page/basic-form-page.component.ts.txt $appPath/pages/basic-form-page/basic-form-page.component.ts
+command_msg $create "$appPath/pages/basic-form-page/basic-form-page.component.ts"
 rm $appPath/pages/basic-form-page/basic-form-page.component.ts.txt
+command_msg $remove "$appPath/pages/basic-form-page/basic-form-page.component.ts.txt"
 
 
 sed -i "s/{ ReactiveFormsModule }/{ FormsModule, ReactiveFormsModule }/g" $appPath/app.module.ts
+command_msg $update "$appPath/app.module.ts"
 sed -i "/^@NgModule.*/i import { BasicFormPageComponent } from './pages/basic-form-page/basic-form-page.component';" $appPath/app.module.ts
+command_msg $update "$appPath/app.module.ts"
 
 sed -i "/imports.*/a FormsModule," $appPath/app.module.ts
+command_msg $update "$appPath/app.module.ts"
 sed -i "/declarations.*/a BasicFormPageComponent," $appPath/app.module.ts
+command_msg $update "$appPath/app.module.ts"
 
 sed -i "/^export const APP_ROUTES: Routes.*/i import { BasicFormPageComponent } from '../pages/basic-form-page/basic-form-page.component';" $appPath/router/app.routes.ts
+command_msg $update "$appPath/router/app.routes.ts"
 sed -i "/^export const APP_ROUTES: Routes.*/a { path: 'basic-form', component: BasicFormPageComponent,}," $appPath/router/app.routes.ts
+command_msg $update "$appPath/router/app.routes.ts"
 
 echo '<div><a routerLink="/basic-form">Basic Form</a></div>' >> $appPath/pages/landing-page/landing-page.component.html
+command_msg $update "$appPath/pages/landing-page/landing-page.component.html"
+
+echo -e "$success Formly added to Project $name"
+echo -e $line

@@ -1,20 +1,44 @@
 #!/bin/bash
 
+Color_Off='\033[0m'       # Text Reset
+# Regular Colors
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Blue='\033[0;34m'         # Blue
+Yellow='\033[0;33m'       # Yellow
+Purple='\033[0;35m'       # Purple
+
+remove="${Purple}DELETE${Color_Off}"
+success="${Green}SUCCESS${Color_Off}"
+create="${Green}CREATE${Color_Off}"
+update="${Green}UPDATE${Color_Off}"
+error="${Red}ERROR${Color_Off}"
+starting="${Yellow}STARTING${Color_Off}"
+complete="${Yellow}COMPLETED${Color_Off}"
+line="${Yellow}#################################${Color_Off}"
+complete="${Yellow}COMPLETED${Color_Off}"
+
 empty="empty"
 name=$empty
 basePath="/workspace"
-success="SUCCESS"
-error="ERROR"
-starting="STARTING"
+
+command_msg(){
+  if [ $? == 0 ] ; then
+    echo -e "$1 $2"
+  else
+    echo -e "$error $2"
+    exit 1
+  fi
+}
 
 # display help message if -h is a commandline arg
 help_message() {
   if [[ $1 == "-h" ]]; then
-    echo "Usage fix-existing-project.sh -p {project name}";
+    echo "Usage patch-existing-project.sh -n {project name}";
     echo "-n: Angular project to add environments to";
     echo "OPTIONS:"
     echo "-b Root of the angular mono-repo"
-    exit 0
+    exit 1
   fi
 }
 
@@ -31,8 +55,8 @@ done
 help_message $help
 
 if [[ ! -d $basePath ]]; then
-  echo "$error: Root of the angular mono-repo cannot be found ($basePath)"
-  exit 0
+  echo -e "$error Root of the angular mono-repo cannot be found ($basePath)"
+  exit 1
 fi
 
 cd $basePath
@@ -40,51 +64,60 @@ cd $basePath
 projectPath="./projects/$name/src";
 appPath="$projectPath/app"
 
-echo "#################################"
-echo "$starting: Updating project $name"
-echo "#################################"
+echo -e $line
+echo -e "$starting Patching project $name"
 
 # if the project has been successfully created lets customise it
 if [[ ! -f "$appPath/app.module.ts" ]]; then
-  echo "$error: Project $name could not be found";
-  exit 0;
+  echo -e "$error Project $name could not be found";
+  exit 1;
 fi
 
 # add material to the new projects app.modules
 sed -i "/^@NgModule.*/i import { MaterialModules } from '../../../../material.modules'" $appPath/app.module.ts
 sed -i "/imports.*/a MaterialModules," $appPath/app.module.ts
-echo "$success: app.module.ts configured for MaterialModules"
+command_msg $update "$appPath/app.module.ts"
 
 # Add base layout and components
 ng generate component layouts/default-layout --project=$name
+command_msg $success "component layouts/default-layout in project $name"
 cp $basePath/templates/default-layout.component.html $appPath/layouts/default-layout/default-layout.component.html
+command_msg $update "$appPath/layouts/default-layout/default-layout.component.html"
 ng generate component pages/not-found-page --project=$name
+command_msg $success "component pages/not-found-page in project $name"
 ng generate component pages/landing-page --project=$name
-echo "$success: base layout and components created"
+command_msg $success "component pages/landing-page in project $name"
+
 
 # fix up the router
 # need to skip if router not added
 if [[ -f "$appPath/app-routing.module.ts" ]]; then
   mkdir $appPath/router
   rm $appPath/app-routing.module.ts
+  command_msg $remove "$appPath/app-routing.module.ts"
   cp -a ./templates/router/app-routing.module.txt $appPath/router/app-routing.module.ts
+  command_msg $create "$appPath/router/app-routing.module.ts"
   cp -a ./templates/router/app.routes.txt $appPath/router/app.routes.ts
+  command_msg $create "$appPath/router/app.routes.ts"
   # fix the app component for routing
   sed -i "s/app-routing.module/router\\/app-routing.module/" $appPath/app.module.ts
-  echo "$success: router configured"
+  command_msg $update "$appPath/app.module.ts"
+  echo -e "$success router configured"
 fi
 
 # added environment variables
 cp -a ./templates/environments $projectPath
-echo "$success: environments copied to project"
+command_msg $success "environments copied to project $name"
 # update angular.json with production fileReplacements for env
 updatedAngularJson="$(jq ".projects.$name.architect.build.configurations.production.fileReplacements += [{\"replace\": \"src/environments/environment.ts\",\"with\": \"src/environments/environment.prod.ts\"}]" ./angular.json)"
 echo -E "${updatedAngularJson}" > ./angular.json
-echo "$success: angular.json updated with production.fileReplacements for environments"
+command_msg $update "angular.json"
+echo -e "$success angular.json updated with production.fileReplacements for environments"
 
 # added serve a build to package json
-updatedPackageJson="$(jq ".scripts += {\"serve:$name\": \"ng serve $name -o\"}" ./package.json)"
-echo -E "${updatedPackageJson}" > ./package.json
-updatedPackageJson="$(jq ".scripts += {\"build:$name\": \"ng build $name\"}" ./package.json)"
-echo -E "${updatedPackageJson}" > ./package.json
-echo "$success: package.json updated"
+npmAddScript -k "serve:$name" -v "ng serve $name -o" -f
+npmAddScript -k "build:$name" -v "ng build $name" -f
+command_msg $update "package.json"
+
+echo -e "$complete Project $name patched"
+echo -e $line

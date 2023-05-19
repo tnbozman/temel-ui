@@ -1,0 +1,12 @@
+#!/bin/bash
+
+rm -rf ./projects
+rm .editorconfig
+rm angular.json
+rm material.modules.ts
+rm package-lock.json
+rm package.json
+rm README.md
+rm tsconfig.json
+
+clear
