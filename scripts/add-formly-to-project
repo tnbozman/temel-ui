@@ -68,7 +68,7 @@ projectPath="./projects/$name/src";
 appPath="$projectPath/app"
 
 ng add @ngx-formly/schematics --ui-theme=material --project $name
-command_msg $success "add Formly to project
+command_msg $success "add Formly to project"
 
 mkdir -p $appPath/pages/basic-form-page/
 cp -r $basePath/templates/basic-form-page/* $appPath/pages/basic-form-page/

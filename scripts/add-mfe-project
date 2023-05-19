@@ -40,9 +40,9 @@ help_message() {
   if [[ $1 == "-h" ]]; then
     echo "Usage add-mfe-project.sh -p {dev port} -w {workspace} -n {project name} [options]";
     echo "-n: Angular project name";
-    echo "-w: Angular workspace name workspace - hint: look at your lib {workspace}-lib"
     echo "-p: Module federation remote's port and angular dev port";
     echo "OPTIONS:"
+    echo "-w: Angular workspace name workspace (default: package.json name)- hint: look at your lib {workspace}-lib"
     echo "-b Root of the angular mono-repo"
     exit 1
   fi
@@ -68,7 +68,7 @@ validate_port() {
 }
 
 validate_args() {
-  if [[ $port == $empty ]] || [[ $name == $empty ]] || [[ $workspace == $empty ]] ; then
+  if [[ $port == $empty ]] || [[ $name == $empty ]] ; then
     echo -e "$error Invalid arguments, please see help (-h)"
     exit 1
   fi
@@ -84,6 +84,11 @@ do
         h) help="-h";;
     esac
 done
+
+if [[ $workspace == $empty ]]; then
+  workspace=$(jq ".name" package.json)
+  command_msg $success "Workspace set to $workspace"
+fi
 
 # display help message if -h is a commandline arg
 help_message $help
@@ -117,6 +122,9 @@ command_msg $success "Module Federation configure as remote on port: $port"
 
 ./scripts/patch-existing-project -n $name -b $basePath
 
+ng add @angular/material --project $name
+command_msg $success "angular/material added to project $name"
+
 # add serve and build scripts to package.json
 serveAll=$(jq ".scripts.serve" ./package.json | sed -e 's/^"//' -e 's/"$//' -e 's/\\//g')
 npmAddScript -k serve -v "$serveAll \"npm run serve:$name\"" -f
@@ -127,6 +135,9 @@ command_msg $update "package.json"
 # fi
 
 ./scripts/add-formly-to-project -n $name -b $basePath
+
+cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html
+command_msg $update "projects/shell/src/app/app.component.html"
 
 # ./scripts/add-gl-to-project -n $name -b $basePath -t r -w $workspace -i n
 
