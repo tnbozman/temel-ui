@@ -19,7 +19,6 @@ complete="${Yellow}COMPLETED${Color_Off}"
 
 empty="empty"
 name=$empty
-install="n"
 basePath="/workspace"
 
 command_msg(){
@@ -36,7 +35,6 @@ help_message() {
     echo "Usage add-formly-to-project.sh -n {project name} [options]";
     echo "-n: Project name"
     echo "OPTIONS:"
-    echo "-i: install formly into workspace (n)";
     echo "-b Root of the angular mono-repo"
     exit 1
   fi
@@ -49,11 +47,10 @@ validate_args() {
   fi
 }
 
-while getopts n:i:b:h flag
+while getopts n:b:h flag
 do
     case "${flag}" in
         n) name=${OPTARG};;
-        i) install=${OPTARG};;
         b) basePath=${OPTARG};;
         h) help="-h";;
     esac
@@ -70,10 +67,9 @@ cd $basePath
 projectPath="./projects/$name/src";
 appPath="$projectPath/app"
 
-if [[ $install == "y" || $install == "Y" ]]; then
-    ng add @ngx-formly/schematics --ui-theme=material --project $name
-    echo -e "$success Formly added"
-fi
+ng add @ngx-formly/schematics --ui-theme=material --project $name
+command_msg $success "add Formly to project
+
 mkdir -p $appPath/pages/basic-form-page/
 cp -r $basePath/templates/basic-form-page/* $appPath/pages/basic-form-page/
 command_msg $success "Formly basic page copy"

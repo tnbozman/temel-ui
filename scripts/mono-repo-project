@@ -144,7 +144,7 @@ if [[ $mfReattempt == 1 ]]; then
   echo -e "$success Module federation reattempt"
 fi
 
-./scripts/add-formly-to-project -n shell -b $basePath -i y
+./scripts/add-formly-to-project -n shell -b $basePath
 ./scripts/add-gl-to-project -n shell -b $basePath -w $name -t s -i y
 
 cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html

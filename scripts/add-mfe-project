@@ -110,24 +110,23 @@ echo -e "$starting: Create MFE project $name on port $port"
 
 # Create mfe ng project with name provided
 ng generate application $name
-echo -e "$success Project created"
+command_msg $success "Project $name create"
 # configure the new project as a module federation remote on the port provided
 ng add @angular-architects/module-federation --project $name --port $port --type remote
-echo -e "$success Module Federation configured"
+command_msg $success "Module Federation configure as remote on port: $port"
 
 ./scripts/patch-existing-project -n $name -b $basePath
 
 # add serve and build scripts to package.json
 serveAll=$(jq ".scripts.serve" ./package.json | sed -e 's/^"//' -e 's/"$//' -e 's/\\//g')
 npmAddScript -k serve -v "$serveAll \"npm run serve:$name\"" -f
-
-echo -e "$success package.json updated"
+command_msg $update "package.json"
 
 # if [[ -f "./Jenkinsfile"]]; then
 #   sed -i "/def microFrontends.*/a \ \ \t\t\t\t\t\t\t\t\t\t $name" ./Jenkinsfile
 # fi
 
-./scripts/add-formly-to-project -n $name -b $basePath -i n
+./scripts/add-formly-to-project -n $name -b $basePath
 
 # ./scripts/add-gl-to-project -n $name -b $basePath -t r -w $workspace -i n
 
