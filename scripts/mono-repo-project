@@ -110,7 +110,7 @@ sed -i "/declarations.*/a BaseComponentDirective," ./projects/$name-lib/src/lib/
 command_msg $update "projects/$name-lib/src/lib/$name-lib.module.ts"
 
 echo -e "$starting: create project shell"
-ng generate application shell --skip-install
+ng generate application shell --skip-install --routing true --style scss
 command_msg $success "project shell created"
 npm install -g npm-add-script
 command_msg $success "npm npm-add-script added"
@@ -118,7 +118,9 @@ command_msg $success "npm npm-add-script added"
 ./scripts/patch-existing-project -n shell -b $basePath
 
 ng add @angular/material --project shell
-command_msg $success "angular/material added to project shell"
+command_msg $success "added angular/material added to project shell"
+ng add @angular/cdk
+command_msg $success "added angular/component development kit to project shell"
 
 ng add @angular-architects/module-federation --project shell --port 4200 --type dynamic-host
 command_msg $success "Module federation added to shell project"
