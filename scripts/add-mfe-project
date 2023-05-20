@@ -86,7 +86,7 @@ do
 done
 
 if [[ $workspace == $empty ]]; then
-  workspace=$(jq ".name" package.json)
+  workspace=$(jq ".name" package.json | sed -e 's/"//g')
   command_msg $success "Workspace set to $workspace"
 fi
 
@@ -116,14 +116,18 @@ echo -e "$starting: Create MFE project $name on port $port"
 # Create mfe ng project with name provided
 ng generate application $name
 command_msg $success "Project $name create"
-# configure the new project as a module federation remote on the port provided
-ng add @angular-architects/module-federation --project $name --port $port --type remote
-command_msg $success "Module Federation configure as remote on port: $port"
 
 ./scripts/patch-existing-project -n $name -b $basePath
 
 ng add @angular/material --project $name
 command_msg $success "angular/material added to project $name"
+
+# configure the new project as a module federation remote on the port provided
+# https://github.com/angular-architects/module-federation-plugin/issues/93
+ng add @angular-architects/module-federation --project $name --port $port --type remote
+command_msg $success "Module Federation configure as remote on port: $port"
+
+
 
 # add serve and build scripts to package.json
 serveAll=$(jq ".scripts.serve" ./package.json | sed -e 's/^"//' -e 's/"$//' -e 's/\\//g')
@@ -136,10 +140,10 @@ command_msg $update "package.json"
 
 ./scripts/add-formly-to-project -n $name -b $basePath
 
+./scripts/add-gl-to-project -n $name -b $basePath -t r -w $workspace -i n
+
 cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html
 command_msg $update "projects/shell/src/app/app.component.html"
-
-# ./scripts/add-gl-to-project -n $name -b $basePath -t r -w $workspace -i n
 
 echo -e "$success MFE project $name on port $port created"
 echo -e $line

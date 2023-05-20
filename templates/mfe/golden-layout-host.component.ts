@@ -6,7 +6,7 @@ import {
 } from "golden-layout";
 import { BaseComponentDirective } from '{workspace}-lib';
 import { GoldenLayoutComponentService } from '../golden-layout-component.service';
-import { GoldenLayoutExample } from '../golden-layout-example/golden-layout-example.component';
+import { GoldenLayoutExampleComponent } from '../golden-layout-example/golden-layout-example.component';
 
 @Component({
   selector: 'app-golden-layout-host',
@@ -50,7 +50,7 @@ export class GoldenLayoutHostComponent implements OnDestroy {
 
   async load(): Promise<void> {
     // register-gl-here
-    this.goldenLayoutComponentService.registerComponentType(GoldenLayoutExample.componentTypeName, GoldenLayoutExample);
+    this.goldenLayoutComponentService.registerComponentType(GoldenLayoutExampleComponent.componentTypeName, GoldenLayoutExampleComponent);
 
   }
 

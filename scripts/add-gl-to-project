@@ -17,11 +17,13 @@ starting="${Yellow}STARTING${Color_Off}"
 line="${Yellow}#################################${Color_Off}"
 complete="${Yellow}COMPLETED${Color_Off}"
 
+shell="s"
+remote="r"
 empty="empty"
 name=$empty
 install="n"
 workspace=$empty
-mfeType="s"
+mfeType=$shell
 basePath="/workspace"
 
 command_msg(){
@@ -95,7 +97,8 @@ command_msg $success "Golden layout templates added to project $name"
 sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/golden-layout-component.service.ts
 command_msg $update "$appPath/components/golden-layout/golden-layout-component.service.ts"
 
-if [[ $mfeType == "s" ]]; then
+if [[ $mfeType == $shell ]]; then
+
   sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/boolean/boolean.component.ts
   command_msg $update "$appPath/components/golden-layout/boolean/boolean.component.ts"
 
@@ -104,6 +107,7 @@ if [[ $mfeType == "s" ]]; then
 
   sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/color/color.component.ts
   command_msg $update "$appPath/components/golden-layout/color/color.component.ts"
+
 else
 
   cp -r $basePath/templates/mfe/controls/* $appPath/components/golden-layout/controls/
@@ -118,10 +122,10 @@ else
   rm -rf $appPath/components/golden-layout/boolean
   command_msg $remove "$appPath/components/golden-layout/boolean/boolean.component.ts"
 
-  rm -rf $appPath/components/golden-layout/text/text.component.ts
+  rm -rf $appPath/components/golden-layout/text
   command_msg $update "$appPath/components/golden-layout/text/text.component.ts"
 
-  rm -rf $appPath/components/golden-layout/color/color.component.ts
+  rm -rf $appPath/components/golden-layout/color
   command_msg $update "$appPath/components/golden-layout/color/color.component.ts"
 
   sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/golden-layout-example/golden-layout-example.component.ts
@@ -170,7 +174,7 @@ command_msg $update "$projectPath/styles.scss"
 sed -i "/^@NgModule.*/i import { GoldenLayoutExamplePageComponent } from './pages/golden-layout-example-page/golden-layout-example-page.component';" $appPath/app.module.ts
 command_msg $update "$appPath/app.module.ts"
 
-if [[ $mfeType == "s"]]; then
+if [[ $mfeType == $shell ]]; then
 
   sed -i "/^@NgModule.*/i import { ColorComponent } from './components/golden-layout/color/color.component';" $appPath/app.module.ts
   command_msg $update "$appPath/app.module.ts"
