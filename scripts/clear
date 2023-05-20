@@ -8,5 +8,8 @@ rm package-lock.json
 rm package.json
 rm README.md
 rm tsconfig.json
+rm -rf ./dist
+rm -rf ./.vscode
+rm -rf ./.angular
 
 clear

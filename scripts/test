@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cat ./package.json | jq '.scripts.serve = "concurrently --kill-others \"npm run watch:temel-lib\" \"npm run serve:shell\""' > ./package.json.tmp
-cp ./package.json.tmp ./package.json
-rm ./package.json.tmp
