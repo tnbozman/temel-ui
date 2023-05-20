@@ -1,0 +1,11 @@
+<section id="predefinedLayoutsSection">
+  <select #layoutSelect
+    id="layoutSelect"
+    class="control"
+    [value]="initialLayoutName"
+    (change)="handleLayoutSelectChange(layoutSelect.value)"
+  >
+    <option *ngFor="let name of layoutNames">{{name}}</option>
+  </select>
+  <button #loadLayoutButton id="loadLayoutButton" class="control" (click)="handleLoadLayoutButtonClick()">Load Layout</button>
+</section>
