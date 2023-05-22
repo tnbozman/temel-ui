@@ -22,6 +22,7 @@ name=$empty
 workspace=$empty
 project=$empty
 basePath="/workspace"
+mfe="y"
 
 command_msg(){
   if [ $? == 0 ] ; then
@@ -39,6 +40,7 @@ help_message() {
     echo "-p: Angular project name"
     echo "-w: Angular workspace name";
     echo "OPTIONS:"
+    echo "-m Register as mfe component (add to shell?) (y)"
     echo "-b Root of the angular mono-repo"
     exit 1
   fi
@@ -76,20 +78,19 @@ if [[ ! -d $basePath ]]; then
 fi
 
 cd $basePath
-projectPath="./projects/$name/src";
+projectPath="./projects/$project/src";
 appPath="$projectPath/app"
 
 # kabab case name to camel case
 componentName="${echo $name | sed -e "s/\b\(.\)/\u\1/g" | sed -e 's/-//g'}Component"
-componentPath="./components/golden-layout/$name/$name.component"
+componentPath="$appPath/components/golden-layout/$name/$name.component"
 
 ng generate component components/golden-layout/${name} --project=$project
-echo -e "$success $name component generated"
+command_msg $success "$name component generated"
 
-sed -i "/^@NgModule.*/i import { $componentName } from '$componentPath';" $appPath/app.module.ts
-sed -i "/declarations.*/a $componentName," $appPath/app.module.ts
-
-echo -e "$success component $name registered within app.module.ts"
+# sed -i "/^@NgModule.*/i import { $componentName } from '$componentPath';" $appPath/app.module.ts
+# sed -i "/declarations.*/a $componentName," $appPath/app.module.ts
+# echo -e "$success component $name registered within app.module.ts"
 
 cp $basePath/templates/gl.component ${componentPath}.ts
 cp $basePath/templates/gl.component.html ${componentPath}.html
@@ -97,6 +98,19 @@ cp $basePath/templates/gl.component.html ${componentPath}.html
 sed -i "s/{workspace}/$workspace/g" ${componentPath}.ts
 sed -i "s/{name}/$name/g" ${componentPath}.ts
 sed -i "s/{componentName}/$componentName/g" ${componentPath}.ts
+
+# register to service
+sed -i "/^@Component.*/i import { $componentName } from '../$name/$name.component';" $appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts
+sed -i "/async load(): Promise<void>.*/a this.goldenLayoutComponentService.registerComponentType($componentName.componentTypeName, $componentName);" $appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts
+sed -i "/exposes.*/a './$componentName': '${componentPath}.ts';" $appPath/webpack.config.js
+# register with shell
+if [[ $mfe == "y" ]]; then
+  # add to remote mfe webpack
+  remotePublicHost=$(jq ".$project.architect.serve.options.publicHost" ./angular.json)
+
+  camelName=$(echo $componentName || sed 's/Component//g')
+  jq ".$name = { \"remoteEntry\": \"$remotePublicHost/remoteEntry.js\",\"exposedModule\": \"./$camelName\",\"ngModuleName\": \"$componentName\",\"isGoldenLayout\": true }" ./projects/shell/src/assets/mf.manifest.json > ./projects/shell/src/assets/mf.manifest.json
+fi
 
 echo -e "$success Golden Layout Component $name created"
 echo -e $line
