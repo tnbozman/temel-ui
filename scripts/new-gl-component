@@ -23,6 +23,7 @@ workspace=$empty
 project=$empty
 basePath="/workspace"
 mfe="y"
+style="scss"
 
 command_msg(){
   if [ $? == 0 ] ; then
@@ -41,6 +42,7 @@ help_message() {
     echo "-w: Angular workspace name";
     echo "OPTIONS:"
     echo "-m Register as mfe component (add to shell?) (y)"
+    echo "-s Style extension (scss)"
     echo "-b Root of the angular mono-repo"
     exit 1
   fi
@@ -53,6 +55,8 @@ validate_args() {
     echo "Project name: $project"
     echo "Workspace name: $workspace"
     echo "Register as MFE: $name"
+    echo "Style extension: $style"
+
     echoe "Basepath: "
 
     help_message "-h"
@@ -60,7 +64,7 @@ validate_args() {
   fi
 }
 
-while getopts n:p:w:m:b:h flag
+while getopts n:p:w:m:b:s:h flag
 do
     case "${flag}" in
         n) name=${OPTARG};;
@@ -68,6 +72,7 @@ do
         w) workspace=${OPTARG};;
         m) mfe=${OPTARG};;
         b) basePath=${OPTARG};;
+        s) style=${OPTARG};;
         h) help="-h";;
     esac
 done
@@ -109,10 +114,14 @@ cp $basePath/templates/gl.component ${componentPath}.ts
 command_msg $update "${componentPath}.ts"
 cp $basePath/templates/gl.component.html ${componentPath}.html
 command_msg $update "${componentPath}.html"
+cp $basePath/templates/gl.component.scss ${componentPath}.${style}
+command_msg $update "${componentPath}.${style}"
 
 sed -i "s/{workspace}/$workspace/g" ${componentPath}.ts
 command_msg $update "${componentPath}.ts"
 sed -i "s/{name}/$name/g" ${componentPath}.ts
+command_msg $update "${componentPath}.ts"
+sed -i "s/{style}/$style/g" ${componentPath}.ts
 command_msg $update "${componentPath}.ts"
 sed -i "s/{camelName}/$camelName/g" ${componentPath}.ts
 command_msg $update "${componentPath}.ts"

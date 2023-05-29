@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject } from "@angular/core';
+import { Component, ElementRef, Inject } from '@angular/core';
 import { ComponentContainer } from 'golden-layout';
 import { BaseComponentDirective } from '{workspace}-lib';
 
@@ -8,19 +8,19 @@ import { BaseComponentDirective } from '{workspace}-lib';
     styleUrls: ['./{name}.component.{style}']
 })
 
-export class {componentName}Component extends BaseComponentDirective {
+export class {componentName} extends BaseComponentDirective {
   private value: string;
   public initialValue: string;
 
   constructor(@Inject(BaseComponentDirective.GoldenLayoutContainerInjectionToken) private container: ComponentContainer, elRef: ElementRef) {
     super(elRef.nativeElement);
-    
+
     this.container.stateRequestEvent = () => this.handleContainerStateRequestEvent();
 
     const state = this.container.initialState;
     let temp: string;
     if (state === undefined) {
-        temp = {componentName}Component.undefinedValue;
+        temp = {componentName}.undefinedValue;
     } else {
         if (typeof state !== 'string') {
             temp = 'Not a string'; // handle if state is the wrong data type
@@ -31,7 +31,7 @@ export class {componentName}Component extends BaseComponentDirective {
     this.value = temp;
     this.initialValue = this.value;
   }
-  
+
 
   updateValue(value: string) {
     this.value = value;
@@ -42,7 +42,7 @@ export class {componentName}Component extends BaseComponentDirective {
   }
 }
 
-export namespace {componentName}Component {
+export namespace {componentName} {
   export const componentTypeName = '{camelName}';
   export const undefinedValue = 'undefined'; // set to handle undefined
 }
