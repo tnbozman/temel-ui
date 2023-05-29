@@ -70,6 +70,7 @@ validate_port() {
 validate_args() {
   if [[ $port == $empty ]] || [[ $name == $empty ]] ; then
     echo -e "$error Invalid arguments, please see help (-h)"
+    help_message "-h"
     exit 1
   fi
 }
@@ -144,8 +145,8 @@ command_msg $update "package.json"
 
 ./scripts/add-gl-to-project -n $name -b $basePath -t r -w $workspace -i n
 
-cp $basePath/templates/app.component.html $basePath/projects/shell/src/app/app.component.html
-command_msg $update "projects/shell/src/app/app.component.html"
+cp $basePath/templates/app.component.html $appPath/app.component.html
+command_msg $update "$appPath/app.component.html"
 
 echo -e "$success MFE project $name on port $port created"
 echo -e $line

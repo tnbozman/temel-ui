@@ -49,16 +49,24 @@ help_message() {
 validate_args() {
   if [[ $name == $empty || $workspace == $empty || $project == $empty ]] ; then
     echo -e "$error Invalid arguments, please see help (-h)"
+    echo "Component name: $name"
+    echo "Project name: $project"
+    echo "Workspace name: $workspace"
+    echo "Register as MFE: $name"
+    echoe "Basepath: "
+
+    help_message "-h"
     exit 1
   fi
 }
 
-while getopts n:p:w:b:h flag
+while getopts n:p:w:m:b:h flag
 do
     case "${flag}" in
         n) name=${OPTARG};;
         p) project=${OPTARG};;
         w) workspace=${OPTARG};;
+        m) mfe=${OPTARG};;
         b) basePath=${OPTARG};;
         h) help="-h";;
     esac
@@ -81,9 +89,14 @@ cd $basePath
 projectPath="./projects/$project/src";
 appPath="$projectPath/app"
 
+echo $name
 # kabab case name to camel case
-componentName="${echo $name | sed -e "s/\b\(.\)/\u\1/g" | sed -e 's/-//g'}Component"
+componentName="$(echo $name | sed -e "s/\b\(.\)/\u\1/g" | sed -e 's/-//g')Component"
+command_msg $success "Component Name ($componentName) set"
 componentPath="$appPath/components/golden-layout/$name/$name.component"
+command_msg $success "Component Path ($componentPath) set"
+camelName=$(echo $componentName || sed 's/Component//g')
+command_msg $success "Component Camel Name ($camelName) set"
 
 ng generate component components/golden-layout/${name} --project=$project
 command_msg $success "$name component generated"
@@ -93,23 +106,40 @@ command_msg $success "$name component generated"
 # echo -e "$success component $name registered within app.module.ts"
 
 cp $basePath/templates/gl.component ${componentPath}.ts
+command_msg $update "${componentPath}.ts"
 cp $basePath/templates/gl.component.html ${componentPath}.html
+command_msg $update "${componentPath}.html"
 
 sed -i "s/{workspace}/$workspace/g" ${componentPath}.ts
+command_msg $update "${componentPath}.ts"
 sed -i "s/{name}/$name/g" ${componentPath}.ts
+command_msg $update "${componentPath}.ts"
+sed -i "s/{camelName}/$camelName/g" ${componentPath}.ts
+command_msg $update "${componentPath}.ts"
 sed -i "s/{componentName}/$componentName/g" ${componentPath}.ts
+command_msg $update "${componentPath}.ts"
 
 # register to service
 sed -i "/^@Component.*/i import { $componentName } from '../$name/$name.component';" $appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts
+command_msg $update "$appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts"
 sed -i "/async load(): Promise<void>.*/a this.goldenLayoutComponentService.registerComponentType($componentName.componentTypeName, $componentName);" $appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts
-sed -i "/exposes.*/a './$componentName': '${componentPath}.ts';" $appPath/webpack.config.js
+command_msg $update "$appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts"
+sed -i "/exposes.*/a './$componentName': '${componentPath}.ts'," ./projects/$project/webpack.config.js
+command_msg $update "./projects/$project/webpack.config.js"
 # register with shell
 if [[ $mfe == "y" ]]; then
   # add to remote mfe webpack
-  remotePublicHost=$(jq ".$project.architect.serve.options.publicHost" ./angular.json)
+  remotePublicHost=$(jq ".projects.$project.architect.serve.options.publicHost" ./angular.json)
+  remotePublicHost=$( echo $remotePublicHost | sed "s/\"//g" )
+  jq ".$camelName = { \"remoteEntry\": \"$remotePublicHost/remoteEntry.js\",\"exposedModule\": \"./$camelName\",\"ngModuleName\": \"$componentName\",\"isGoldenLayout\": true }" ./projects/shell/src/assets/mf.manifest.json > ./projects/shell/src/assets/mf.manifest.tmp.json
+  command_msg $create "./projects/shell/src/assets/mf.manifest.tmp.json"
+  cp ./projects/shell/src/assets/mf.manifest.tmp.json ./projects/shell/src/assets/mf.manifest.json
+  command_msg $update "./projects/shell/src/assets/mf.manifest.json"
+  rm ./projects/shell/src/assets/mf.manifest.tmp.json
+  command_msg $remove "./projects/shell/src/assets/mf.manifest.tmp.json"
 
-  camelName=$(echo $componentName || sed 's/Component//g')
-  jq ".$name = { \"remoteEntry\": \"$remotePublicHost/remoteEntry.js\",\"exposedModule\": \"./$camelName\",\"ngModuleName\": \"$componentName\",\"isGoldenLayout\": true }" ./projects/shell/src/assets/mf.manifest.json > ./projects/shell/src/assets/mf.manifest.json
+  sed -i "/content:.*/ { type: "component", id: "$camelName", title: "Example", header: { show: "top", }, isClosable: true, componentType: '$componentName', componentState: 'example', } as ComponentItemConfig" $appPath/golden-layout/predefined-layouts.ts
+  command_msg $update "$appPath/golden-layout/predefined-layouts.ts"
 fi
 
 echo -e "$success Golden Layout Component $name created"

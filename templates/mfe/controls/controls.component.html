@@ -1,3 +1,14 @@
+<section id="addComponentSection">
+  <select #registeredComponentTypeSelect
+    id="registeredComponentTypeSelect"
+    class="control"
+    [value]="initialRegisteredComponentTypeName"
+    (change)="handleRegisteredComponentTypeSelectChange(registeredComponentTypeSelect.value)"
+  >
+    <option *ngFor="let name of registeredComponentTypeNames">{{name}}</option>
+  </select>
+  <button #addComponentButton id="addComponentButton" class="control" (click)="handleAddComponentButtonClick()">Add Component</button>
+</section>
 <section id="predefinedLayoutsSection">
   <select #layoutSelect
     id="layoutSelect"

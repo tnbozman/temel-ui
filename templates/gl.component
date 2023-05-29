@@ -43,6 +43,6 @@ export class {componentName}Component extends BaseComponentDirective {
 }
 
 export namespace {componentName}Component {
-  export const componentTypeName = '{name}';
+  export const componentTypeName = '{camelName}';
   export const undefinedValue = 'undefined'; // set to handle undefined
 }

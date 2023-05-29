@@ -113,23 +113,22 @@ else
   cp -r $basePath/templates/mfe/controls/* $appPath/components/golden-layout/controls/
   command_msg $update "add mfe golden layout controls"
 
-  mkdir -p $appPath/components/golden-layout/golden-layout-example
-  cp -r $basePath/templates/mfe/golden-layout-example/* $appPath/components/golden-layout/golden-layout-example/
-  command_msg $create "golden layout example component"
   cp $basePath/templates/mfe/golden-layout-host.component.ts $appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts
   command_msg $update "$appPath/components/golden-layout/golden-layout-host/golden-layout-host.component.ts"
 
   rm -rf $appPath/components/golden-layout/boolean
-  command_msg $remove "$appPath/components/golden-layout/boolean/boolean.component.ts"
+  command_msg $remove "$appPath/components/golden-layout/boolean"
 
   rm -rf $appPath/components/golden-layout/text
-  command_msg $update "$appPath/components/golden-layout/text/text.component.ts"
+  command_msg $update "$appPath/components/golden-layout/text"
 
   rm -rf $appPath/components/golden-layout/color
-  command_msg $update "$appPath/components/golden-layout/color/color.component.ts"
+  command_msg $update "$appPath/components/golden-layout/color"
 
-  sed -i "s/{workspace}/$workspace/g" $appPath/components/golden-layout/golden-layout-example/golden-layout-example.component.ts
-  command_msg $update "$appPath/components/golden-layout/golden-layout-example/golden-layout-example.component.ts"
+  cp $basePath/templates/mfe/predefined-layouts.ts $appPath/components/golden-layout/predefined-layouts.ts
+  command_msg $create "$appPath/components/golden-layout/predefined-layouts.ts"
+
+  ./scripts/new-gl-component -n golden-layout-example -p $name -w $workspace -b $basePath
 
 fi
 
@@ -188,14 +187,6 @@ if [[ $mfeType == $shell ]]; then
   sed -i "/declarations.*/a TextComponent," $appPath/app.module.ts
   command_msg $update "$appPath/app.module.ts"
   sed -i "/declarations.*/a BooleanComponent," $appPath/app.module.ts
-  command_msg $update "$appPath/app.module.ts"
-
-else
-
-  sed -i "/^@NgModule.*/i import { GoldenLayoutExampleComponent } from './components/golden-layout/golden-layout-example/golden-layout-example.component';" $appPath/app.module.ts
-  command_msg $update "$appPath/app.module.ts"
-
-  sed -i "/declarations.*/a GoldenLayoutExampleComponent," $appPath/app.module.ts
   command_msg $update "$appPath/app.module.ts"
 
 fi

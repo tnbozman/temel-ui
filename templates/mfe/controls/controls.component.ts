@@ -1,45 +1,29 @@
 import { Component, ElementRef, OnDestroy, ViewChild, ViewContainerRef } from '@angular/core';
-import {
-  DragSource,
-  GoldenLayout,
-  LayoutConfig,
-  ResolvedLayoutConfig
-} from "golden-layout";
+import { GoldenLayout } from "golden-layout";
 import { GoldenLayoutComponentService } from '../golden-layout-component.service';
 import { GoldenLayoutHostComponent } from '../golden-layout-host/golden-layout-host.component';
 import { predefinedLayoutNames, predefinedLayouts } from '../predefined-layouts';
-import { TextComponent } from '{workspace}-lib';
-import { loadRemoteModule } from '@angular-architects/module-federation'
 
 @Component({
   selector: 'app-controls',
   templateUrl: './controls.component.html',
   styleUrls: ['./controls.component.scss']
 })
-export class ControlsComponent implements OnDestroy {
+export class ControlsComponent {
   private _goldenLayoutHostComponent!: GoldenLayoutHostComponent
   private _goldenLayout!: GoldenLayout;
-  private _savedLayout: ResolvedLayoutConfig | undefined;
 
   private _selectedRegisteredComponentTypeName!: string;
-  private _componentTextValue!: string;
-  private _selectedLayoutName!: string;
-  private _dragSources: Array<DragSource | undefined> = [];
-
-  @ViewChild('dragMe') private _dragMeElementRef!: ElementRef;
-  @ViewChild('virtualRadio') private _virtualRadioElementRef!: ElementRef<HTMLInputElement>;
-  @ViewChild('viewComponentRefRadio') private _viewComponentRefRadioElementRef!: ElementRef<HTMLInputElement>;
-  @ViewChild('appRefRadio') private _appRefRadioElementRef!: ElementRef<HTMLInputElement>;
-
   public registeredComponentTypeNames!: readonly string[];
   public initialRegisteredComponentTypeName!: string;
-  public initialComponentTextValue = 'Water';
-  public layoutNames!: readonly string[];
-  public initialLayoutName!: string;
-  public saveLayoutButtonDisabled = true;
+
+  private _selectedLayoutName!: string;
 
   @ViewChild('placeHolder', { read: ViewContainerRef })
   viewContainer!: ViewContainerRef;
+
+  public layoutNames!: readonly string[];
+  public initialLayoutName!: string;
 
   get element() {
     return this._elRef.nativeElement;
@@ -50,77 +34,31 @@ export class ControlsComponent implements OnDestroy {
   ) {
   }
 
-  ngOnDestroy() {
-    for (const dragSource of this._dragSources) {
-      if (dragSource) {
-        this._goldenLayout.removeDragSource(dragSource);
-      }
-    }
-  }
-
   initialise(value: GoldenLayoutHostComponent) {
     this._goldenLayoutHostComponent = value;
     this._goldenLayout = this._goldenLayoutHostComponent.goldenLayout;
 
-    this._virtualRadioElementRef.nativeElement.checked = this._goldenLayoutHostComponent.virtualActive;
-    this.updateViewComponentRefRadio();
+    this._goldenLayoutHostComponent.setVirtualActive(true);
+
     this._goldenLayoutHostComponent.load().then(()=>{
       this.registeredComponentTypeNames = this._goldenLayoutComponentService.getRegisteredComponentTypeNames();
       this._selectedRegisteredComponentTypeName = this.registeredComponentTypeNames[0]
       this.initialRegisteredComponentTypeName = this._selectedRegisteredComponentTypeName;
-      this._componentTextValue = this.initialComponentTextValue;
       this.layoutNames = predefinedLayoutNames;
       this._selectedLayoutName = this.layoutNames[0]
       this.initialLayoutName = this._selectedLayoutName;
-  
-      this.initialiseDragSources();
+      this.handleLoadLayoutButtonClick();
     });
 
-  }
-
-  handleEmbeddedRadioClick() {
-    this._goldenLayoutHostComponent.setVirtualActive(this._virtualRadioElementRef.nativeElement.checked);
-    this.updateViewComponentRefRadio();
-  }
-
-  handleVirtualRadioClick() {
-    this._goldenLayoutHostComponent.setVirtualActive(this._virtualRadioElementRef.nativeElement.checked);
-    this.updateViewComponentRefRadio();
-  }
-
-  handleViewComponentRefRadioClick() {
-    this._goldenLayoutHostComponent.setViewContainerRefActive(this._viewComponentRefRadioElementRef.nativeElement.checked);
-  }
-
-  handleAppRefRadioClick() {
-    this._goldenLayoutHostComponent.setViewContainerRefActive(this._viewComponentRefRadioElementRef.nativeElement.checked);
   }
 
   handleRegisteredComponentTypeSelectChange(value: string) {
     this._selectedRegisteredComponentTypeName = value;
   }
 
-  handleComponentTextInputInput(value: string) {
-    this._componentTextValue = value;
-  }
-
   handleAddComponentButtonClick() {
     const componentType = this._selectedRegisteredComponentTypeName;
     this._goldenLayout.addComponent(componentType);
-  }
-
-  handleAddTextComponentButtonClick() {
-    // this demonstrates how to access created Angular component
-    const goldenLayoutComponent = this._goldenLayout.newComponent('Text'); // do not set state here
-    const componentRef = this._goldenLayoutHostComponent.getComponentRef(goldenLayoutComponent.container);
-    if (componentRef === undefined) {
-      throw new Error('Unexpected error getting ComponentRef');
-    } else {
-      const textComponent = componentRef.instance;
-      const unknownComponent = textComponent as unknown;
-      const iTextComponent = unknownComponent as TextComponent;
-      iTextComponent.setInitialValue(this._componentTextValue);
-    }
   }
 
   handleLayoutSelectChange(value: string) {
@@ -136,46 +74,4 @@ export class ControlsComponent implements OnDestroy {
     }
   }
 
-  handleSaveLayoutButtonClick() {
-    this._savedLayout = this._goldenLayout.saveLayout();
-    this.saveLayoutButtonDisabled = false;
-  }
-
-  handleReloadSavedLayoutClick() {
-    if (this._savedLayout === undefined) {
-      throw new Error('No saved layout');
-    } else {
-      const layoutConfig = LayoutConfig.fromResolved(this._savedLayout);
-      this._goldenLayout.loadLayout(layoutConfig);
-    }
-  }
-
-  private initialiseDragSources() {
-    this.loadDragSource('Drag me !', 'Color', this._dragMeElementRef);
-  }
-
-  private loadDragSource(title: string, componentName: string, element: ElementRef | undefined): void {
-    if (!this._goldenLayout) {
-      return;
-    }
-
-    const config = () => {
-      const item: DragSource.ComponentItemConfig = {
-        state: undefined,
-        title,
-        type: componentName,
-      };
-      return item;
-    };
-    this._dragSources.push(this._goldenLayout.newDragSource(element?.nativeElement, config));
-  }
-
-  private updateViewComponentRefRadio() {
-    const viewComponentRefActive = this._goldenLayoutHostComponent.viewContainerRefActive;
-    this._viewComponentRefRadioElementRef.nativeElement.checked = viewComponentRefActive;
-    this._appRefRadioElementRef.nativeElement.checked = !viewComponentRefActive;
-    const virtualActive = this._goldenLayoutHostComponent.virtualActive;
-    this._viewComponentRefRadioElementRef.nativeElement.disabled = !virtualActive;
-    this._appRefRadioElementRef.nativeElement.disabled = !virtualActive;
-  }
 }
