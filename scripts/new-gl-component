@@ -106,10 +106,6 @@ command_msg $success "Component Camel Name ($camelName) set"
 ng generate component components/golden-layout/${name} --project=$project
 command_msg $success "$name component generated"
 
-# sed -i "/^@NgModule.*/i import { $componentName } from '$componentPath';" $appPath/app.module.ts
-# sed -i "/declarations.*/a $componentName," $appPath/app.module.ts
-# echo -e "$success component $name registered within app.module.ts"
-
 cp $basePath/templates/gl.component ${componentPath}.ts
 command_msg $update "${componentPath}.ts"
 cp $basePath/templates/gl.component.html ${componentPath}.html
@@ -147,7 +143,7 @@ if [[ $mfe == "y" ]]; then
   rm ./projects/shell/src/assets/mf.manifest.tmp.json
   command_msg $remove "./projects/shell/src/assets/mf.manifest.tmp.json"
 
-  sed -i "/content:.*/ { type: "component", id: "$camelName", title: "Example", header: { show: "top", }, isClosable: true, componentType: '$componentName', componentState: 'example', } as ComponentItemConfig" $appPath/golden-layout/predefined-layouts.ts
+  sed -i "/content:.*/a { type: "component", id: "$camelName", title: "Example", header: { show: "top", }, isClosable: true, componentType: '$componentName', componentState: 'example', } as ComponentItemConfig" $appPath/golden-layout/predefined-layouts.ts
   command_msg $update "$appPath/golden-layout/predefined-layouts.ts"
 fi
 
