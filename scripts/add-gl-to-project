@@ -128,7 +128,7 @@ else
   cp $basePath/templates/mfe/predefined-layouts.ts $appPath/components/golden-layout/predefined-layouts.ts
   command_msg $create "$appPath/components/golden-layout/predefined-layouts.ts"
 
-  ./scripts/new-gl-component -n golden-layout-example -p $name -w $workspace -b $basePath
+  ./scripts/new-gl-component -n golden-layout-example -p $name -m y -w $workspace -b $basePath
 
 fi
 
