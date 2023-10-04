@@ -1,0 +1,17 @@
+{
+  "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "add-environments-to-project": {
+      "description": "A blank schematic.",
+      "factory": "./add-environments-to-project/index#addEnvironmentsToProject"
+    },
+    "patch-existing-lib": {
+      "description": "A blank schematic.",
+      "factory": "./patch-existing-lib/index#patchExistingLib"
+    },
+    "patch-existing-project": {
+      "description": "A blank schematic.",
+      "factory": "./patch-existing-project/index#patchExistingProject"
+    }
+  }
+}
