@@ -2,7 +2,8 @@ import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 
-import { addScriptsToPackageJson } from '.';
+import { addScriptsToPackageJson } from '../utils/packageJson-util';
+import { ProjectType } from '../utils/enums/project-type.enum';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -31,7 +32,7 @@ describe('patch-existing-lib', () => {
     const expectedBuild = `ng build ${appName}`;
     const expectedBuildWatch = `ng build ${appName} --watch`;
 
-    const resultTree = addScriptsToPackageJson(tree, appName);
+    const resultTree = addScriptsToPackageJson(tree, appName, ProjectType.LIB);
 
     const result = resultTree.read(packageJsonPath);
     let json = JSON.parse(result!.toString());
