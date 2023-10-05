@@ -10,6 +10,7 @@ import {
   move,
   url,
   template,
+  noop,
 } from '@angular-devkit/schematics';
 import { setupOptions } from '../utils/options-util';
 import { normalize } from 'path';
@@ -23,9 +24,9 @@ export function patchExistingProject(_options: any): Rule {
   return async (tree: Tree, _context: SchematicContext) => {
     await setupOptions(tree, _options);
 
-    const skipImport = _options.unitTest === true;
+    const { unitTest, project, path } = _options;
 
-    const projectSrcPath = normalize(_options.path + '/');
+    const projectSrcPath = normalize(path + '/');
     const projectAppPath = `${projectSrcPath}app`;
 
     // add material.modules
@@ -51,34 +52,37 @@ export function patchExistingProject(_options: any): Rule {
       templateCopyPath += '/app/layouts';
       templateMovePath += 'app/layouts/';
     }
-    tree = addScriptsToPackageJson(tree, _options.project, ProjectType.APP);
+    tree = addScriptsToPackageJson(tree, project, ProjectType.APP);
     const templateSource = apply(url(templateCopyPath), [template({ ..._options }), move(templateMovePath)]);
 
     return chain([
+      unitTest
+        ? noop()
+        : externalSchematic('@schematics/angular', 'component', {
+            name: 'layouts/default-layout',
+            project: project,
+          }),
+
       mergeWith(templateSource, MergeStrategy.Overwrite),
 
-      externalSchematic('@schematics/angular', 'component', {
-        name: 'layouts/default-layout',
-        project: _options.project,
-        skipImport: skipImport,
-      }),
-
       // Generate not-found-page component
-      externalSchematic('@schematics/angular', 'component', {
-        name: 'pages/not-found-page',
-        project: _options.project,
-        skipImport: skipImport,
-      }),
+      unitTest
+        ? noop()
+        : externalSchematic('@schematics/angular', 'component', {
+            name: 'pages/not-found-page',
+            project: project,
+          }),
 
       // Generate landing-page component
-      externalSchematic('@schematics/angular', 'component', {
-        name: 'pages/landing-page',
-        project: _options.project,
-        skipImport: skipImport,
-      }),
+      unitTest
+        ? noop()
+        : externalSchematic('@schematics/angular', 'component', {
+            name: 'pages/landing-page',
+            project: project,
+          }),
       // Add environments using the local schematic
       externalSchematic('./collection.json', 'add-environments-to-project', {
-        project: _options.project,
+        project: project,
       }),
     ]);
   };
