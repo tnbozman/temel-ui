@@ -10,6 +10,7 @@ import {
   addRelativeImportToFile,
   addNgModuleImport,
   insertChangeToFile,
+  insertChangeToTextFile,
 } from './ng-util';
 
 import { InsertDirection } from './enums/insert-direction.enum';
@@ -132,5 +133,32 @@ import { ${otherImportName} } from '${otherAbsoluteImportPath}';`;
     insertChangeToFile(tree, '/test-file.txt', change, InsertDirection.AFTER);
     const content = tree.readContent('/test-file.txt');
     expect(content).toBe('Hello World beautiful');
+  });
+
+  it('should insert text after the matched line', () => {
+    // arrange
+    const path = '/test-match-file.txt';
+    const matchText = 'Match this line';
+    const insertText = 'Inserted line\n';
+    tree.create(path, 'Hello\nMatch this line\nWorld');
+    // act
+    insertChangeToTextFile(tree, path, matchText, insertText);
+
+    // assert
+    const content = tree.readContent(path);
+    expect(content).toContain('Match this line\nInserted line\nWorld');
+  });
+
+  it('should not change the file if matchText is not found', () => {
+    // arrange
+    const path = '/test-match-file.txt';
+    const matchText = 'Nonexistent line';
+    const insertText = 'Inserted line\n';
+    tree.create(path, 'Hello\nMatch this line\nWorld');
+    // act
+    insertChangeToTextFile(tree, path, matchText, insertText);
+    // assert
+    const content = tree.readContent(path);
+    expect(content).not.toContain('Inserted line');
   });
 });

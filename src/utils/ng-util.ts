@@ -160,3 +160,48 @@ export function insertChangeToFile(tree: Tree, filepath: string, change: Change,
   }
   return tree;
 }
+
+/**
+ * Inserts the given text into a file after a specific line containing the matchText.
+ *
+ * @param tree - The current Tree.
+ * @param filePath - The path to the file where the text should be inserted.
+ * @param matchText - The text to match, which will be the line after which the insertion takes place.
+ * @param insertText - The text to insert.
+ * @returns The updated Tree.
+ */
+export function insertChangeToTextFile(tree: Tree, filePath: string, matchText: string, insertText: string): Tree {
+  const sourceFile = getSrcFile(tree, filePath);
+  // This finds the position after the line with matchString
+  const position = findPositionAfterLine(sourceFile, matchText);
+  if (position !== -1) {
+    const change = new InsertChange(filePath, position, insertText);
+
+    const recorder = tree.beginUpdate(filePath);
+    recorder.insertLeft(change.pos, change.toAdd);
+    tree.commitUpdate(recorder);
+  }
+
+  return tree;
+}
+
+/**
+ * Finds the position in the source file immediately after a line containing the specified searchText.
+ *
+ * @param sourceFile - The TypeScript source file to search within.
+ * @param searchText - The text to search for.
+ * @returns The position in the source file immediately after the line containing the searchText, or -1 if not found.
+ */
+
+function findPositionAfterLine(sourceFile: ts.SourceFile, searchText: string): number {
+  const lines = sourceFile.text.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes(searchText)) {
+      // Get the start of the next line
+      return sourceFile.getPositionOfLineAndCharacter(i + 1, 0);
+    }
+  }
+
+  return -1;
+}
