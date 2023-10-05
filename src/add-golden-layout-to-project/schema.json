@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicsAddGLToProject",
+  "title": "Add Golden Layouy To Project Schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project name",
+      "x-prompt": "Name of project to add golden layout?"
+    }
+  },
+  "required": ["project"]
+}

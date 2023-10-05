@@ -15,6 +15,24 @@
       "description": "A blank schematic.",
       "factory": "./patch-existing-project/index#patchExistingProject",
       "schema": "./patch-existing-project/schema.json"
+    },
+    "add-formly-to-project": {
+      "description": "A blank schematic.",
+      "factory": "./add-formly-to-project/index#addFormlyToProject",
+      "schema": "./add-formly-to-project/schema.json"
+    },
+    "add-golden-layout-to-project": {
+      "description": "A blank schematic.",
+      "factory": "./add-golden-layout-to-project/index#addGoldenLayoutToProject",
+      "schema": "./add-golden-layout-to-project/schema.json"
+    },
+    "add-mfe-project": {
+      "description": "A blank schematic.",
+      "factory": "./add-mfe-project/index#addMfeProject"
+    },
+    "mono-repo-project": {
+      "description": "A blank schematic.",
+      "factory": "./mono-repo-project/index#monoRepoProject"
     }
   }
 }

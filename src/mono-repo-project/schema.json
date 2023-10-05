@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicsMonoRepoProject",
+  "title": "Create Mono Repo Project Schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Workspace name",
+      "x-prompt": "Name of mono repo workspace?"
+    }
+  },
+  "required": ["project"]
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicsAddFormlyToProject",
+  "title": "Add Formly To Project Schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project name",
+      "x-prompt": "Name of project to add formly to?"
+    }
+  },
+  "required": ["project"]
+}

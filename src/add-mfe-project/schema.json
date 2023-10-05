@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicsAddMFEProject",
+  "title": "Add MFE To Project Schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project name",
+      "x-prompt": "Name of project to add golden layout?"
+    },
+    "port": {
+      "type": "number",
+      "description": "development port number",
+      "x-prompt": "Module federation MFE remote development port number?"
+    }
+  },
+  "required": ["project", "port"]
+}
