@@ -1,10 +1,6 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
-import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'path';
-
-
-import { setupOptions } from '.';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
@@ -17,48 +13,33 @@ describe('add-environments-to-project', () => {
   const angularJsonPath = '/angular.json';
 
   beforeEach(() => {
-    tree = new UnitTestTree(Tree.empty());  // start with an empty tree
+    tree = new UnitTestTree(Tree.empty()); // start with an empty tree
 
     // Add index.html to the tree with specified content
     tree.create(indexPath, indexContent);
-    tree.create(angularJsonPath, JSON.stringify({
-      version: 1,
-      projects: {
-        'test-app': {
-          root: projectPath,
-          sourceRoot: `${projectPath}/src`,
-        }
-      }
-    }));
+    tree.create(
+      angularJsonPath,
+      JSON.stringify({
+        version: 1,
+        projects: {
+          'test-app': {
+            root: projectPath,
+            sourceRoot: `${projectPath}/src`,
+          },
+        },
+      }),
+    );
   });
 
   it('should contain index.html', () => {
     expect(tree.files).toContain(indexPath);
   });
 
-  it('should set the default project if none is provided in options', async () => {
-    // arrange
-    const options: any = {};
-    // act
-    await setupOptions(tree, options);
-    // assert
-    expect(options.project).toBe(appName);
-  });
-
-  it('should throw an error for an invalid project name', async () => {
-    // arrange
-    const options = { project: 'non-existent-project' };
-    // act/assert
-    await expectAsync(setupOptions(tree, options)).toBeRejectedWith(
-      new SchematicsException('Invalid project name: non-existent-project')
-    );
-  });
-
   it('addEnvironmentsToProject', async () => {
     // arrange
     const runner = new SchematicTestRunner('schematics', collectionPath);
     // act
-    const testTree = await runner.runSchematic('add-environments-to-project', {}, tree);
+    const testTree = await runner.runSchematic('add-environments-to-project', { project: appName }, tree);
     // assert
     // test the correct file structure has been created
     const srcPath = `${projectPath}/src`;
@@ -67,7 +48,7 @@ describe('add-environments-to-project', () => {
     expect(testTree.files).toContain(`${srcPath}/assets/env.template.js`);
 
     // test that the script tag exists in index.html
-    const buffer = testTree.read(indexPath)
+    const buffer = testTree.read(indexPath);
     const content = buffer!.toString();
     expect(content).toContain('<script src="env.js"></script>');
   });

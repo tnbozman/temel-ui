@@ -1,10 +1,4 @@
-import {
-  Rule,
-  SchematicContext,
-  Tree,
-  SchematicsException,
-} from '@angular-devkit/schematics';
-
+import { Rule, SchematicContext, Tree, SchematicsException } from '@angular-devkit/schematics';
 
 export function addScriptsToPackageJson(tree: Tree, projectName: string): Tree {
   const packageJsonPath = '/package.json';
@@ -22,10 +16,9 @@ export function addScriptsToPackageJson(tree: Tree, projectName: string): Tree {
   return tree;
 }
 
-
 export function patchExistingLib(_options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
-    const projectName = _options.name;
+    const projectName = _options.project;
     if (!projectName) {
       throw new SchematicsException('Project name is required');
     }

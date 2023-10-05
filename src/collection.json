@@ -3,15 +3,18 @@
   "schematics": {
     "add-environments-to-project": {
       "description": "A blank schematic.",
-      "factory": "./add-environments-to-project/index#addEnvironmentsToProject"
+      "factory": "./add-environments-to-project/index#addEnvironmentsToProject",
+      "schema": "./add-environments-to-project/schema.json"
     },
     "patch-existing-lib": {
       "description": "A blank schematic.",
-      "factory": "./patch-existing-lib/index#patchExistingLib"
+      "factory": "./patch-existing-lib/index#patchExistingLib",
+      "schema": "./patch-existing-lib/schema.json"
     },
     "patch-existing-project": {
       "description": "A blank schematic.",
-      "factory": "./patch-existing-project/index#patchExistingProject"
+      "factory": "./patch-existing-project/index#patchExistingProject",
+      "schema": "./patch-existing-project/schema.json"
     }
   }
 }

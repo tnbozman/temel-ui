@@ -11,26 +11,27 @@ describe('patch-existing-lib', () => {
   const packageJsonPath = '/package.json';
   const appName = 'test-app';
   beforeEach(() => {
-    tree = new UnitTestTree(Tree.empty());  // start with an empty tree
+    tree = new UnitTestTree(Tree.empty()); // start with an empty tree
 
     // Add index.html to the tree with specified content
-    tree.create(packageJsonPath, JSON.stringify({
-      name: appName,
-      scripts: {
-        build: "tsc -p tsconfig.json",
-        test: "ts-node node_modules/jasmine/bin/jasmine"
-      },
-    }
-    ));
+    tree.create(
+      packageJsonPath,
+      JSON.stringify({
+        name: appName,
+        scripts: {
+          build: 'tsc -p tsconfig.json',
+          test: 'ts-node node_modules/jasmine/bin/jasmine',
+        },
+      }),
+    );
   });
 
   it('addScriptsToPackageJson', async () => {
-
     // arrange
     const expectedBuild = `ng build ${appName}`;
     const expectedBuildWatch = `ng build ${appName} --watch`;
 
-    const resultTree = addScriptsToPackageJson(tree, appName)
+    const resultTree = addScriptsToPackageJson(tree, appName);
 
     const result = resultTree.read(packageJsonPath);
     let json = JSON.parse(result!.toString());
@@ -40,7 +41,6 @@ describe('patch-existing-lib', () => {
   });
 
   it('works', async () => {
-
     // arrange
     const expectedBuild = `ng build ${appName}`;
     const expectedBuildWatch = `ng build ${appName} --watch`;
@@ -48,7 +48,7 @@ describe('patch-existing-lib', () => {
     const runner = new SchematicTestRunner('schematics', collectionPath);
 
     // act
-    const testTree = await runner.runSchematic('patch-existing-lib', {name: appName}, tree);
+    const testTree = await runner.runSchematic('patch-existing-lib', { project: appName }, tree);
 
     // assert
     const result = testTree.read(packageJsonPath);

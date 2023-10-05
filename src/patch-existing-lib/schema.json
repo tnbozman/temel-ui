@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicsPatchExistingLib",
+  "title": "Patch Existing Lib Schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project name",
+      "x-prompt": "Name of lib project to patch?"
+    }
+  },
+  "required": ["project"]
+}

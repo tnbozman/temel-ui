@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicsAddEnvironmentsToProject",
+  "title": "Add Environments To Project Schema",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project name",
+      "x-prompt": "Name of project to add environments?"
+    }
+  },
+  "required": ["project"]
+}

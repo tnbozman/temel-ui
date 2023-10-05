@@ -1,8 +1,8 @@
-import { 
-  Rule, 
-  SchematicContext, 
+import {
+  Rule,
+  SchematicContext,
   MergeStrategy,
-  Tree,  
+  Tree,
   SchematicsException,
   apply,
   url,
@@ -10,26 +10,10 @@ import {
   mergeWith,
   chain,
   template,
- } from '@angular-devkit/schematics';
+} from '@angular-devkit/schematics';
 
-//  import { JsonParseMode, parseJsonAst } from '@angular-devkit/core';
-
-import { join, normalize } from 'path';
-import { getWorkspace } from '@schematics/angular/utility/workspace';
-
-export async function setupOptions(host: Tree, options: any): Promise<Tree> {
-  const workspace = await getWorkspace(host);
-  if (!options.project) {
-    options.project = workspace.projects.keys().next().value;
-  }
-  const project = workspace.projects.get(options.project);
-  if (!project) {
-    throw new SchematicsException(`Invalid project name: ${options.project}`);
-  }
-
-  options.path = join(normalize(project.root), 'src');
-  return host;
-}
+import { normalize } from 'path';
+import { setupOptions } from '../utils/options-util';
 
 export function addEnvironmentsToProject(options: any): Rule {
   return async (tree: Tree, _context: SchematicContext) => {
@@ -37,10 +21,7 @@ export function addEnvironmentsToProject(options: any): Rule {
 
     const envJsTag = '\n  <script src="env.js"></script>\n';
     const projectSrcPath = normalize(options.path + '/');
-    const templateSource = apply(url('./files/src'), [
-      template({...options}),
-      move(projectSrcPath)
-    ]);
+    const templateSource = apply(url('./files/src'), [template({ ...options }), move(projectSrcPath)]);
 
     const indexPath = projectSrcPath + 'index.html';
     const buffer = tree.read(indexPath);
