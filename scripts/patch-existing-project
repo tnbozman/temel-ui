@@ -106,8 +106,8 @@ if [[ -f "$appPath/app-routing.module.ts" ]]; then
 fi
 
 # added environment variables
-cp -a ./templates/environments $projectPath
-command_msg $success "environments copied to project $name"
+./scripts/add-environments-to-project -n $name
+
 # update angular.json with production fileReplacements for env
 updatedAngularJson="$(jq ".projects.$name.architect.build.configurations.production.fileReplacements += [{\"replace\": \"src/environments/environment.ts\",\"with\": \"src/environments/environment.prod.ts\"}]" ./angular.json)"
 echo -E "${updatedAngularJson}" > ./angular.json

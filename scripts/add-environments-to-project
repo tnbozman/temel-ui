@@ -72,13 +72,14 @@ if [[ ! -f "$projectPath/app/app.module.ts" ]]; then
 fi
 
 # added environment variables
-cp -a ./templates/environments $projectPath
+cp -a ./templates/environments/environments $projectPath
 command_msg $success "environments copied to project $name"
 
-# update angular.json with production fileReplacements for env
-updatedAngularJson="$(jq ".projects.$name.architect.build.configurations.production.fileReplacements += [{\"replace\": \"projects/$name/src/environments/environment.ts\",\"with\": \"projects/$name/src/environments/environment.prod.ts\"}]" ./angular.json)"
-echo -E "${updatedAngularJson}" > angular.json
-command_msg $update "angular.json"
+cp -r ./templates/environments/assets/* $projectPath/assets/
+command_msg $success "env.js and env.template.js setup for docker envsubst $name"
+
+sed -i "/<base href="/" />*/a <script src="assets/env.js"></script>" $projectPath/index.html
+command_msg $success "env.js added to index.html"
 
 echo -e "$success Environments added to project $name"
 echo -e $line

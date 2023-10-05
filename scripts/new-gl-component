@@ -143,8 +143,9 @@ if [[ $mfe == "y" ]]; then
   rm ./projects/shell/src/assets/mf.manifest.tmp.json
   command_msg $remove "./projects/shell/src/assets/mf.manifest.tmp.json"
 
-  sed -i "/content:.*/a { type: "component", id: "$camelName", title: "Example", header: { show: "top", }, isClosable: true, componentType: '$componentName', componentState: 'example', } as ComponentItemConfig" $appPath/golden-layout/predefined-layouts.ts
-  command_msg $update "$appPath/golden-layout/predefined-layouts.ts"
+  sed -i "/content:.*/ { type: "component", id: "$camelName", title: "Example", header: { show: "top", }, isClosable: true, componentType: '$componentName', componentState: 'example', } as ComponentItemConfig" $appPath/components/golden-layout/predefined-layouts.ts
+  command_msg $update "$appPath/components/golden-layout/predefined-layouts.ts"
+
 fi
 
 echo -e "$success Golden Layout Component $name created"

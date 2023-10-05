@@ -38,7 +38,7 @@ command_msg(){
 # display help message if -h is a commandline arg
 help_message() {
   if [[ $1 == "-h" ]]; then
-    echo "Usage add-mfe-project.sh -p {dev port} -w {workspace} -n {project name} [options]";
+    echo "Usage add-mfe-project.sh -p {dev port} -n {project name} [options]";
     echo "-n: Angular project name";
     echo "-p: Module federation remote's port and angular dev port";
     echo "OPTIONS:"
